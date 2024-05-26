@@ -4,8 +4,8 @@ import 'package:kudosware/core/service/student/student_service.dart';
 
 final class FirestoreStudentService implements StudentService {
   FirestoreStudentService({
-    FirebaseFirestore? firestore,
-  }) : _firestore = firestore ?? FirebaseFirestore.instance;
+    required FirebaseFirestore firestore,
+  }) : _firestore = firestore;
 
   final FirebaseFirestore _firestore;
 
