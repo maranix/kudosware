@@ -11,9 +11,10 @@ final class FirestoreStudentService implements StudentService {
 
   static const _collectionName = "students";
 
+  @override
   Future<FirebasePagedData<List<Student>>> getStudents({
     required int limit,
-    Query<Student>? next,
+    DocumentSnapshot<Object?>? lastReceived,
   }) async {
     final query = _firestore
         .collection(_collectionName)
@@ -22,23 +23,18 @@ final class FirestoreStudentService implements StudentService {
               Student.fromFirestore(snapshot, options),
           toFirestore: (model, options) => model.toFirestore(),
         )
-        .orderBy('createdAt', descending: true);
+        .orderBy('updatedAt', descending: true)
+        .limit(limit);
 
-    QuerySnapshot res;
-    if (next != null) {
-      res = await next.limit(limit).get();
+    QuerySnapshot<Student> res;
+    if (lastReceived != null) {
+      res = await query.startAfterDocument(lastReceived).get();
     } else {
-      res = await query.limit(limit).get();
+      res = await query.get();
     }
 
-    final students = res.docs.map((d) => d.data()).toList().cast<Student>();
-
-    if (res.docs.isEmpty) {
-      return FirebasePagedData(data: students);
-    } else {
-      final nextQuery = query.startAfterDocument(res.docs.last);
-      return FirebasePagedData(data: students, next: nextQuery);
-    }
+    final students = res.docs.map((d) => d.data()).toList();
+    return FirebasePagedData(data: students, lastDoc: res.docs.last);
   }
 
   @override

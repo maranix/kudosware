@@ -18,9 +18,9 @@ final class PagedData<T> extends ResponseType<T> {
 final class FirebasePagedData<T> extends ResponseType<T> {
   const FirebasePagedData({
     required this.data,
-    this.next,
+    this.lastDoc,
   });
 
   final T data;
-  final Query? next;
+  final DocumentSnapshot<Object?>? lastDoc;
 }
