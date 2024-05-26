@@ -1,9 +1,9 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:kudosware/core/model/model.dart';
 
-typedef FirestorePaginationResponse = ({
-  List<Student> data,
-  Query<Student>? nextQuery
+typedef FirestorePageData<T> = ({
+  List<T> data,
+  Query<T>? nextQuery,
 });
 
 abstract interface class StudentService {
@@ -12,8 +12,8 @@ abstract interface class StudentService {
   Future<void> delete(String studentId);
 }
 
-final class FirebaseStudentService implements StudentService {
-  FirebaseStudentService({
+final class FirestoreStudentService implements StudentService {
+  FirestoreStudentService({
     FirebaseFirestore? firestore,
   }) : _firestore = firestore ?? FirebaseFirestore.instance;
 
@@ -21,7 +21,7 @@ final class FirebaseStudentService implements StudentService {
 
   static const _collectionName = "students";
 
-  Future<FirestorePaginationResponse> getStudents({
+  Future<FirestorePageData<Student>> getStudents({
     required int limit,
     Query<Student>? next,
   }) async {
