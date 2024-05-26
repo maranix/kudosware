@@ -5,8 +5,8 @@ import 'package:kudosware/core/service/service.dart';
 
 final class StudentRepository {
   StudentRepository({
-    required StudentService studentService,
-  }) : _service = studentService;
+    required StudentService service,
+  }) : _service = service;
 
   final StudentService _service;
 
