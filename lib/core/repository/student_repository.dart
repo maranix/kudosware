@@ -12,24 +12,17 @@ final class StudentRepository {
 
   static const _pageSize = 10;
 
-  // Important: Not a priority at the moment
-  //
-  // TODO: Refactor this more to make it more modular and re-usable
-  //
-  // Ideally [StudentRepository] should be able to work with any implementation of [StudentService].
-  // Here we are concretely specifying that it'll return a [FirestorePageData] in case of Success.
-  // This limits the reusability of this repository as [get] method will essentially only work for
-  // FirestoreStudentService instances.
-  //
-  Future<ApiResponse<FirestorePageData>> get({
+  Future<ApiResponse<ResponseType<List<Student>>>> getStudents({
     int limit = _pageSize,
     Query<Student>? next,
   }) async {
     try {
-      final resData = await (_service as FirestoreStudentService).getStudents(
-        limit: limit,
-        next: next,
-      );
+      final resData = await switch (_service) {
+        FirestoreStudentService() =>
+          _service.getStudents(limit: limit, next: next),
+        _ => throw const InvalidInterfaceImplementation(),
+      };
+
       return ApiResponse.success(resData);
     } on FirebaseException catch (e) {
       return ApiResponse.failure(

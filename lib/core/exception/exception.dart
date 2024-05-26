@@ -13,3 +13,10 @@ sealed class BaseException implements Exception {
     return "$runtimeType: $message";
   }
 }
+
+final class InvalidInterfaceImplementation extends BaseException {
+  const InvalidInterfaceImplementation({
+    super.message =
+        'Received an invalid implementation of Interface, make sure the implementation is correct and belongs in the heirarchy',
+  });
+}

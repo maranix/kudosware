@@ -1,16 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:kudosware/core/model/model.dart';
-
-typedef FirestorePageData<T> = ({
-  List<T> data,
-  Query<T>? nextQuery,
-});
-
-abstract interface class StudentService {
-  Future<Student> create(Student student);
-  Future<Student> update(Student student);
-  Future<void> delete(String studentId);
-}
+import 'package:kudosware/core/service/student/student_service.dart';
 
 final class FirestoreStudentService implements StudentService {
   FirestoreStudentService({
@@ -21,7 +11,7 @@ final class FirestoreStudentService implements StudentService {
 
   static const _collectionName = "students";
 
-  Future<FirestorePageData<Student>> getStudents({
+  Future<FirebasePagedData<List<Student>>> getStudents({
     required int limit,
     Query<Student>? next,
   }) async {
@@ -44,10 +34,10 @@ final class FirestoreStudentService implements StudentService {
     final students = res.docs.map((d) => d.data()).toList().cast<Student>();
 
     if (res.docs.isEmpty) {
-      return (data: students, nextQuery: null);
+      return FirebasePagedData(data: students);
     } else {
       final nextQuery = query.startAfterDocument(res.docs.last);
-      return (data: students, nextQuery: nextQuery);
+      return FirebasePagedData(data: students, next: nextQuery);
     }
   }
 
