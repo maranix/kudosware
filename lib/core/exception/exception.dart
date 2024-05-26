@@ -1,3 +1,4 @@
+part 'api_exceptions.dart';
 part 'firebase_exceptions.dart';
 
 sealed class BaseException implements Exception {

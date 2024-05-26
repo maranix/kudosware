@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:kudosware/core/exception/exception.dart';
 import 'package:kudosware/core/model/model.dart';
 import 'package:kudosware/core/service/service.dart';
 
@@ -8,17 +10,91 @@ final class StudentRepository {
 
   final StudentService _service;
 
-  Future<Student> create(Student student) async {
-    final resData = await _service.create(student);
-    return resData;
+  static const _pageSize = 10;
+
+  Future<ApiResponse<FirestorePaginationResponse>> get({
+    int limit = _pageSize,
+    Query<Student>? next,
+  }) async {
+    try {
+      final resData = await (_service as FirebaseStudentService).getStudents(
+        limit: limit,
+        next: next,
+      );
+      return ApiResponse.success(resData);
+    } on FirebaseException catch (e) {
+      return ApiResponse.failure(
+        e.message ??
+            'Something went wrong while fetching Students, please try again later.',
+        error: e,
+        stackTrace: e.stackTrace,
+      );
+    } on BaseException catch (e) {
+      return ApiResponse.failure(e.message);
+    } catch (e) {
+      return ApiResponse.failure(
+        'Something went wrong while fetching Student, please try again later.',
+      );
+    }
   }
 
-  Future<Student> update(Student student) async {
-    final resData = await _service.update(student);
-    return resData;
+  Future<ApiResponse<Student>> create(Student student) async {
+    try {
+      final resData = await _service.create(student);
+      return ApiResponse.success(resData);
+    } on FirebaseException catch (e) {
+      return ApiResponse.failure(
+        e.message ??
+            'Something went wrong while creating Student, please try again later.',
+        error: e,
+        stackTrace: e.stackTrace,
+      );
+    } on BaseException catch (e) {
+      return ApiResponse.failure(e.message);
+    } catch (e) {
+      return ApiResponse.failure(
+        'Something went wrong while creating Student, please try again later.',
+      );
+    }
   }
 
-  Future<void> delete(String studentId) async {
-    await _service.delete(studentId);
+  Future<ApiResponse<Student>> update(Student student) async {
+    try {
+      final resData = await _service.update(student);
+      return ApiResponse.success(resData);
+    } on FirebaseException catch (e) {
+      return ApiResponse.failure(
+        e.message ??
+            'Something went wrong while updating Student, please try again later.',
+        error: e,
+        stackTrace: e.stackTrace,
+      );
+    } on BaseException catch (e) {
+      return ApiResponse.failure(e.message);
+    } catch (e) {
+      return ApiResponse.failure(
+        'Something went wrong while updating Student, please try again later.',
+      );
+    }
+  }
+
+  Future<ApiResponse> delete(String studentId) async {
+    try {
+      await _service.delete(studentId);
+      return ApiResponse.success(null);
+    } on FirebaseException catch (e) {
+      return ApiResponse.failure(
+        e.message ??
+            'Something went wrong while deleting Student, please try again later.',
+        error: e,
+        stackTrace: e.stackTrace,
+      );
+    } on BaseException catch (e) {
+      return ApiResponse.failure(e.message);
+    } catch (e) {
+      return ApiResponse.failure(
+        'Something went wrong while deleting Student, please try again later.',
+      );
+    }
   }
 }
