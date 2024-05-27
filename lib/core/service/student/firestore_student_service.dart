@@ -24,7 +24,7 @@ final class FirestoreStudentService implements StudentService {
               Student.fromFirestore(snapshot, options),
           toFirestore: (model, options) => model.toFirestore(),
         )
-        .orderBy('updatedAt', descending: true)
+        .orderBy('updated_at', descending: true)
         .limit(limit);
 
     QuerySnapshot<Student> res;
@@ -34,8 +34,9 @@ final class FirestoreStudentService implements StudentService {
       res = await query.get();
     }
 
+    final lastDoc = res.docs.isEmpty ? null : res.docs.last;
     final students = res.docs.map((d) => d.data()).toList();
-    return (data: students, lastDoc: res.docs.last);
+    return (data: students, lastDoc: lastDoc);
   }
 
   @override
@@ -76,6 +77,6 @@ final class FirestoreStudentService implements StudentService {
                 Student.fromFirestore(snapshot, options),
             toFirestore: (model, options) => model.toFirestore(),
           )
-          .orderBy('updatedAt', descending: true)
+          .orderBy('updated_at', descending: true)
           .snapshots();
 }

@@ -38,7 +38,7 @@ class Student {
           'id': String id,
           'first_name': String firstName,
           'last_name': String lastName,
-          'gender': GenderEnum gender,
+          'gender': String gender,
           'date_of_birth': Timestamp dateOfBirth,
           'created_at': Timestamp createdAt,
           'updated_at': Timestamp updatedAt,
@@ -47,7 +47,9 @@ class Student {
         id: id,
         firstName: firstName,
         lastName: lastName,
-        gender: gender,
+        gender: GenderEnum.values.firstWhere(
+          (e) => e.name == gender,
+        ),
         dateOfBirth: dateOfBirth.toDate(),
         createdAt: createdAt.toDate(),
         updatedAt: updatedAt.toDate(),
@@ -100,6 +102,8 @@ class Student {
       updatedAt: dummyDate,
     );
   }
+
+  String get fullName => "$firstName $lastName";
 
   @override
   bool operator ==(Object other) {

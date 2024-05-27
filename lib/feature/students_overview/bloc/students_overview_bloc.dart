@@ -195,6 +195,10 @@ final class StudentsOverviewBloc
     return state.copyWith(studentIds: ids, studentMap: map);
   }
 
+  Student getStudentById(String id) {
+    return state.studentMap[id]!;
+  }
+
   @override
   Future<void> close() {
     _studentCollectionChangesSubscription?.cancel();
