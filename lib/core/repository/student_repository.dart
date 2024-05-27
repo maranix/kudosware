@@ -28,7 +28,10 @@ final class StudentRepository {
         _ => throw const InvalidInterfaceImplementation(),
       };
 
-      return ApiResponse.firstorePagedData(resData.data, resData.lastDoc);
+      return ApiResponse.success(
+        resData.data,
+        lastReceivedDocument: resData.lastDoc,
+      );
     } on FirebaseException catch (e) {
       return ApiResponse.failure(
         e.message ??

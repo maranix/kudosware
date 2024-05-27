@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:bloc/bloc.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:equatable/equatable.dart';
-import 'package:kudosware/core/exception/exception.dart';
 import 'package:kudosware/core/model/model.dart';
 import 'package:kudosware/core/repository/repository.dart';
 import 'package:kudosware/core/repository/student_repository.dart';
@@ -18,6 +17,10 @@ final class StudentsOverviewBloc
   })  : _repo = repo,
         super(const StudentsOverviewState()) {
     on<StudentsOverviewCollectionChanged>(_onCollectionChanged);
+    on<StudentsOverviewCollectionDocumentAdded>(_onCollectionDocumentAdded);
+    on<StudentsOverviewCollectionDocumentRemoved>(_onCollectionDocumentRemoved);
+    on<StudentsOverviewCollectionDocumentModified>(
+        _onCollectionDocumentModified);
     on<StudentsOverviewFetchRequested>(_onFetchRequested);
     on<StudentsOverviewFetchMoreRequested>(_onFetchMoreRequested);
     on<StudentsOverviewStudentDeletionRequested>(_onDeleteRequested);
@@ -37,49 +40,83 @@ final class StudentsOverviewBloc
     // Update the item if we have it in our students list.
     // Remove the item if we have it in our students list.
     // Otherwise ignore the change event.
+
+    for (final change in event.changeEvent.docChanges) {
+      return switch (change.type) {
+        DocumentChangeType.added =>
+          add(StudentsOverviewCollectionDocumentAdded(change)),
+        DocumentChangeType.removed =>
+          add(StudentsOverviewCollectionDocumentRemoved(change)),
+        DocumentChangeType.modified =>
+          add(StudentsOverviewCollectionDocumentModified(change)),
+      };
+    }
+  }
+
+  Future<void> _onCollectionDocumentAdded(
+    StudentsOverviewCollectionDocumentAdded event,
+    Emitter<StudentsOverviewState> emit,
+  ) async {
+    final student = event.change.doc.data();
+
+    if (student != null) {
+      final newState = _addStudent(student);
+      emit(newState);
+    }
+  }
+
+  Future<void> _onCollectionDocumentRemoved(
+    StudentsOverviewCollectionDocumentRemoved event,
+    Emitter<StudentsOverviewState> emit,
+  ) async {
+    final id = event.change.doc.id;
+
+    if (!state.studentMap.containsKey(id)) return;
+
+    final newState = _removeStudent(id);
+    emit(newState);
+  }
+
+  Future<void> _onCollectionDocumentModified(
+    StudentsOverviewCollectionDocumentModified event,
+    Emitter<StudentsOverviewState> emit,
+  ) async {
+    final doc = event.change.doc;
+
+    if (!state.studentMap.containsKey(doc.id)) return;
+
+    final student = doc.data();
+    if (student != null) {
+      final newState = _addStudent(student);
+      emit(newState);
+    }
   }
 
   Future<void> _onFetchRequested(
     StudentsOverviewFetchRequested event,
     Emitter<StudentsOverviewState> emit,
   ) async {
-    if (state.students.isNotEmpty) return;
+    if (state.studentIds.isNotEmpty) return;
 
     emit(state.copyWith(status: StudentsOverviewStatus.loading));
-    try {
-      final res = await _repo.getStudents();
-      return switch (res) {
-        ApiResponseSuccess() => emit(
-            state.copyWith(
-              status: StudentsOverviewStatus.success,
-              students: res.data,
-            ),
+
+    final res = await _repo.getStudents();
+    switch (res) {
+      case ApiResponseSuccess():
+        final newState = _addStudentList(res.data);
+        emit(
+          newState.copyWith(
+            status: StudentsOverviewStatus.success,
+            lastReceivedDocument: res.lastReceivedDocument,
           ),
-        ApiResponseFirestorePagedData() => emit(
-            state.copyWith(
-              status: StudentsOverviewStatus.success,
-              students: res.data,
-              lastReceivedDocument: res.lastReceived,
-            ),
+        );
+      case ApiResponseFailure():
+        emit(
+          state.copyWith(
+            status: StudentsOverviewStatus.failure,
+            errorMessage: res.message,
           ),
-        ApiResponseFailure() => emit(
-            state.copyWith(
-              status: StudentsOverviewStatus.failure,
-              errorMessage: res.message,
-            ),
-          ),
-        _ => null,
-      };
-    } on FirebaseException catch (e) {
-      emit(state.copyWith(
-          status: StudentsOverviewStatus.failure, errorMessage: e.message));
-    } on BaseException catch (e) {
-      emit(state.copyWith(
-          status: StudentsOverviewStatus.failure, errorMessage: e.message));
-    } catch (e) {
-      emit(state.copyWith(
-          status: StudentsOverviewStatus.failure,
-          errorMessage: 'Something went wrong, please try again later'));
+        );
     }
   }
 
@@ -89,42 +126,25 @@ final class StudentsOverviewBloc
   ) async {
     emit(state.copyWith(status: StudentsOverviewStatus.loadingMore));
 
-    try {
-      final res =
-          await _repo.getStudents(lastReceived: state.lastReceivedDocument);
+    final res =
+        await _repo.getStudents(lastReceived: state.lastReceivedDocument);
+    switch (res) {
+      case ApiResponseSuccess():
+        final newState = _addStudentList(res.data);
 
-      return switch (res) {
-        ApiResponseSuccess() => emit(
-            state.copyWith(
-              status: StudentsOverviewStatus.success,
-              students: res.data,
-            ),
+        emit(
+          newState.copyWith(
+            status: StudentsOverviewStatus.success,
+            lastReceivedDocument: res.lastReceivedDocument,
           ),
-        ApiResponseFirestorePagedData() => emit(
-            state.copyWith(
-              status: StudentsOverviewStatus.success,
-              students: res.data,
-              lastReceivedDocument: res.lastReceived,
-            ),
+        );
+      case ApiResponseFailure():
+        emit(
+          state.copyWith(
+            status: StudentsOverviewStatus.failure,
+            errorMessage: res.message,
           ),
-        ApiResponseFailure() => emit(
-            state.copyWith(
-              status: StudentsOverviewStatus.failure,
-              errorMessage: res.message,
-            ),
-          ),
-        _ => null,
-      };
-    } on FirebaseException catch (e) {
-      emit(state.copyWith(
-          status: StudentsOverviewStatus.failure, errorMessage: e.message));
-    } on BaseException catch (e) {
-      emit(state.copyWith(
-          status: StudentsOverviewStatus.failure, errorMessage: e.message));
-    } catch (e) {
-      emit(state.copyWith(
-          status: StudentsOverviewStatus.failure,
-          errorMessage: 'Something went wrong, please try again later'));
+        );
     }
   }
 
@@ -132,23 +152,54 @@ final class StudentsOverviewBloc
     StudentsOverviewStudentDeletionRequested event,
     Emitter<StudentsOverviewState> emit,
   ) async {
-    try {
-      await _repo.delete(event.student.id);
-    } on FirebaseException catch (e) {
-      emit(state.copyWith(
-          status: StudentsOverviewStatus.failure, errorMessage: e.message));
-    } on BaseException catch (e) {
-      emit(state.copyWith(
-          status: StudentsOverviewStatus.failure, errorMessage: e.message));
-    } catch (e) {
-      emit(state.copyWith(
-          status: StudentsOverviewStatus.failure,
-          errorMessage: 'Something went wrong, please try again later'));
+    final res = await _repo.delete(event.student.id);
+
+    switch (res) {
+      case ApiResponseSuccess():
+        final newState = _removeStudent(event.student.id);
+        emit(newState);
+      case ApiResponseFailure():
+        emit(
+          state.copyWith(
+            status: StudentsOverviewStatus.failure,
+            errorMessage: res.message,
+          ),
+        );
     }
   }
 
   void _collectionlistener(QuerySnapshot<Student> event) {
     add(StudentsOverviewCollectionChanged(event));
+  }
+
+  StudentsOverviewState _addStudentList(List<Student> list) {
+    final ids = List<String>.from(state.studentIds);
+    final map = Map<String, Student>.from(state.studentMap);
+
+    for (var student in list) {
+      ids.add(student.id);
+      map[student.id] = student;
+    }
+
+    return state.copyWith(studentIds: ids, studentMap: map);
+  }
+
+  StudentsOverviewState _addStudent(Student student) {
+    final ids = Set<String>.from([student.id, ...state.studentIds]);
+    final map = Map<String, Student>.from(state.studentMap);
+
+    map[student.id] = student;
+    return state.copyWith(studentIds: ids.toList(), studentMap: map);
+  }
+
+  StudentsOverviewState _removeStudent(String id) {
+    final ids = List<String>.from(state.studentIds);
+    final map = Map<String, Student>.from(state.studentMap);
+
+    ids.remove(id);
+    map.remove(id);
+
+    return state.copyWith(studentIds: ids, studentMap: map);
   }
 
   @override

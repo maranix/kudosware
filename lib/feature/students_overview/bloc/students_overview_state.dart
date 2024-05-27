@@ -11,14 +11,17 @@ enum StudentsOverviewStatus {
 final class StudentsOverviewState extends Equatable {
   const StudentsOverviewState({
     this.status = StudentsOverviewStatus.initial,
-    this.students = const [],
+    this.studentIds = const [],
+    this.studentMap = const {},
     this.lastReceivedDocument,
     this.errorMessage,
   });
 
   final StudentsOverviewStatus status;
 
-  final List<Student> students;
+  final List<String> studentIds;
+
+  final Map<String, Student> studentMap;
 
   final DocumentSnapshot<Object?>? lastReceivedDocument;
 
@@ -26,13 +29,15 @@ final class StudentsOverviewState extends Equatable {
 
   StudentsOverviewState copyWith({
     StudentsOverviewStatus? status,
-    List<Student>? students,
+    List<String>? studentIds,
+    Map<String, Student>? studentMap,
     DocumentSnapshot<Object?>? lastReceivedDocument,
     String? errorMessage,
   }) {
     return StudentsOverviewState(
       status: status ?? this.status,
-      students: students ?? this.students,
+      studentIds: studentIds ?? this.studentIds,
+      studentMap: studentMap ?? this.studentMap,
       lastReceivedDocument: lastReceivedDocument ?? this.lastReceivedDocument,
       errorMessage: errorMessage ?? this.errorMessage,
     );
@@ -41,7 +46,9 @@ final class StudentsOverviewState extends Equatable {
   @override
   List<Object?> get props => [
         status,
-        students,
+        studentIds,
+        studentMap,
+        lastReceivedDocument,
         errorMessage,
       ];
 }

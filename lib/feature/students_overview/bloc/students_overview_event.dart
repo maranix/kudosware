@@ -16,6 +16,36 @@ final class StudentsOverviewCollectionChanged extends StudentsOverviewEvent {
   List<Object> get props => [changeEvent];
 }
 
+final class StudentsOverviewCollectionDocumentAdded
+    extends StudentsOverviewEvent {
+  const StudentsOverviewCollectionDocumentAdded(this.change);
+
+  final DocumentChange<Student> change;
+
+  @override
+  List<Object> get props => [change];
+}
+
+final class StudentsOverviewCollectionDocumentRemoved
+    extends StudentsOverviewEvent {
+  const StudentsOverviewCollectionDocumentRemoved(this.change);
+
+  final DocumentChange<Student> change;
+
+  @override
+  List<Object> get props => [change];
+}
+
+final class StudentsOverviewCollectionDocumentModified
+    extends StudentsOverviewEvent {
+  const StudentsOverviewCollectionDocumentModified(this.change);
+
+  final DocumentChange<Student> change;
+
+  @override
+  List<Object> get props => [change];
+}
+
 final class StudentsOverviewFetchRequested extends StudentsOverviewEvent {
   const StudentsOverviewFetchRequested();
 }
