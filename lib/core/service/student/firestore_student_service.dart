@@ -12,7 +12,8 @@ final class FirestoreStudentService implements StudentService {
   static const _collectionName = "students";
 
   @override
-  Future<FirebasePagedData<List<Student>>> getStudents({
+  Future<({List<Student> data, DocumentSnapshot<Object?>? lastDoc})>
+      getStudents({
     required int limit,
     DocumentSnapshot<Object?>? lastReceived,
   }) async {
@@ -34,7 +35,7 @@ final class FirestoreStudentService implements StudentService {
     }
 
     final students = res.docs.map((d) => d.data()).toList();
-    return FirebasePagedData(data: students, lastDoc: res.docs.last);
+    return (data: students, lastDoc: res.docs.last);
   }
 
   @override
@@ -66,4 +67,15 @@ final class FirestoreStudentService implements StudentService {
   Future<void> delete(String studentId) async {
     await _firestore.collection(_collectionName).doc(studentId).delete();
   }
+
+  Stream<QuerySnapshot<Student>> get studentCollectionChangesStream =>
+      _firestore
+          .collection(_collectionName)
+          .withConverter<Student>(
+            fromFirestore: (snapshot, options) =>
+                Student.fromFirestore(snapshot, options),
+            toFirestore: (model, options) => model.toFirestore(),
+          )
+          .orderBy('updatedAt', descending: true)
+          .snapshots();
 }

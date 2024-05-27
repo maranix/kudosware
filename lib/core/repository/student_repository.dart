@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:kudosware/core/exception/exception.dart';
 import 'package:kudosware/core/model/model.dart';
@@ -12,9 +14,12 @@ final class StudentRepository {
 
   static const _pageSize = 10;
 
-  Future<ApiResponse<ResponseType<List<Student>>>> getStudents({
+  final _studentCollectionStreamController =
+      StreamController<QuerySnapshot<Student>>.broadcast();
+
+  Future<ApiResponse<List<Student>>> getStudents({
     int limit = _pageSize,
-    DocumentSnapshot<Student?>? lastReceived,
+    DocumentSnapshot<Object?>? lastReceived,
   }) async {
     try {
       final resData = await switch (_service) {
@@ -23,7 +28,7 @@ final class StudentRepository {
         _ => throw const InvalidInterfaceImplementation(),
       };
 
-      return ApiResponse.success(resData);
+      return ApiResponse.firstorePagedData(resData.data, resData.lastDoc);
     } on FirebaseException catch (e) {
       return ApiResponse.failure(
         e.message ??
@@ -98,5 +103,30 @@ final class StudentRepository {
         'Something went wrong while deleting Student, please try again later.',
       );
     }
+  }
+
+  Stream<QuerySnapshot<Student>> get firestoreStudentCollectionChangesStream {
+    if (_service is! FirestoreStudentService) {
+      throw InvalidInterfaceImplementation(
+        message:
+            'Requested a stream but the implementation doesn\'t expose any streams.'
+            '\n\n'
+            'Interface: StudentService'
+            'Current Implementation: ${_service.runtimeType}'
+            'Accepted Implementation: FirestoreStudentService',
+      );
+    }
+
+    if (_studentCollectionStreamController.hasListener) {
+      return _studentCollectionStreamController.stream;
+    }
+
+    _studentCollectionStreamController
+        .addStream(_service.studentCollectionChangesStream);
+    return _studentCollectionStreamController.stream;
+  }
+
+  void dispose() {
+    _studentCollectionStreamController.close();
   }
 }

@@ -109,6 +109,7 @@ final class EditStudentBloc extends Bloc<EditStudentEvent, EditStudentState> {
             errorMessage: null,
           ),
         ),
+      _ => null,
     };
   }
 
