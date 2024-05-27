@@ -14,12 +14,12 @@ final class StudentRepository {
 
   Future<ApiResponse<ResponseType<List<Student>>>> getStudents({
     int limit = _pageSize,
-    Query<Student>? next,
+    DocumentSnapshot<Student?>? lastReceived,
   }) async {
     try {
       final resData = await switch (_service) {
         FirestoreStudentService() =>
-          _service.getStudents(limit: limit, next: next),
+          _service.getStudents(limit: limit, lastReceived: lastReceived),
         _ => throw const InvalidInterfaceImplementation(),
       };
 

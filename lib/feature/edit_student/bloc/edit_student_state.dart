@@ -60,6 +60,7 @@ final class EditStudentState extends Equatable {
     String? lastName,
     String? gender,
     DateTime? dob,
+    bool? isEditing,
     String? errorMessage,
   }) {
     return EditStudentState._(
