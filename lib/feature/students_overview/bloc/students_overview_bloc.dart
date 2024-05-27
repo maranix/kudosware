@@ -34,13 +34,6 @@ final class StudentsOverviewBloc
     StudentsOverviewCollectionChanged event,
     Emitter<StudentsOverviewState> emit,
   ) async {
-    // TODO: handle change events
-    //
-    // Add the item if we do not have it in our students list.
-    // Update the item if we have it in our students list.
-    // Remove the item if we have it in our students list.
-    // Otherwise ignore the change event.
-
     for (final change in event.changeEvent.docChanges) {
       return switch (change.type) {
         DocumentChangeType.added =>
@@ -185,7 +178,7 @@ final class StudentsOverviewBloc
   }
 
   StudentsOverviewState _addStudent(Student student) {
-    final ids = Set<String>.from([student.id, ...state.studentIds]);
+    final ids = <String>{student.id, ...state.studentIds};
     final map = Map<String, Student>.from(state.studentMap);
 
     map[student.id] = student;

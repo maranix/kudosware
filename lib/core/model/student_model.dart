@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:kudosware/core/enums.dart';
 import 'package:kudosware/core/exception/exception.dart';
-import 'package:kudosware/core/model/model.dart';
 
 class Student {
   const Student({

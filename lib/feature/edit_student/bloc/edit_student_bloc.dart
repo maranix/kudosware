@@ -1,5 +1,6 @@
 import 'package:bloc/bloc.dart';
 import 'package:equatable/equatable.dart';
+import 'package:kudosware/core/enums.dart';
 import 'package:kudosware/core/model/model.dart';
 import 'package:kudosware/core/repository/repository.dart';
 
@@ -109,7 +110,6 @@ final class EditStudentBloc extends Bloc<EditStudentEvent, EditStudentState> {
             errorMessage: null,
           ),
         ),
-      _ => null,
     };
   }
 
