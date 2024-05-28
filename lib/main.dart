@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -17,16 +18,20 @@ Future<void> main() async {
 
   Bloc.observer = const AppBlocObserver();
 
-  final studentService = FirestoreStudentService(
-    firestore: FirebaseFirestore.instance,
-  );
-
   runApp(
     MultiRepositoryProvider(
       providers: [
+        RepositoryProvider<AuthenticationRepository>(
+          create: (context) => AuthenticationRepository(
+              service: FirebaseAuthenticationService(
+            firebaseAuth: FirebaseAuth.instance,
+          )),
+        ),
         RepositoryProvider<StudentRepository>(
           create: (context) => StudentRepository(
-            service: studentService,
+            service: FirestoreStudentService(
+              firestore: FirebaseFirestore.instance,
+            ),
           ),
         ),
       ],

@@ -1,3 +1,5 @@
+import 'package:kudosware/core/enums.dart';
+
 part 'api_exceptions.dart';
 part 'firebase_exceptions.dart';
 

@@ -10,7 +10,7 @@ class HomePage extends StatelessWidget {
     return Scaffold(
       floatingActionButton: FloatingActionButton(
         shape: const CircleBorder(),
-        key: const Key('homeView_addTodo_floatingActionButton'),
+        key: const Key('homePage_addStudent_floatingActionButton'),
         onPressed: () => Navigator.of(context).push(EditStudentPage.route()),
         child: const Icon(Icons.add),
       ),
