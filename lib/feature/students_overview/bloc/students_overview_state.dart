@@ -11,7 +11,7 @@ enum StudentsOverviewStatus {
 final class StudentsOverviewState extends Equatable {
   const StudentsOverviewState({
     this.status = StudentsOverviewStatus.initial,
-    this.studentIds = const [],
+    this.studentIds = const {},
     this.studentMap = const {},
     this.lastReceivedDocument,
     this.errorMessage,
@@ -19,7 +19,7 @@ final class StudentsOverviewState extends Equatable {
 
   final StudentsOverviewStatus status;
 
-  final List<String> studentIds;
+  final Set<String> studentIds;
 
   final Map<String, Student> studentMap;
 
@@ -29,7 +29,7 @@ final class StudentsOverviewState extends Equatable {
 
   StudentsOverviewState copyWith({
     StudentsOverviewStatus? status,
-    List<String>? studentIds,
+    Set<String>? studentIds,
     Map<String, Student>? studentMap,
     DocumentSnapshot<Object?>? lastReceivedDocument,
     String? errorMessage,

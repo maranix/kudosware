@@ -166,7 +166,7 @@ final class StudentsOverviewBloc
   }
 
   StudentsOverviewState _addStudentList(List<Student> list) {
-    final ids = List<String>.from(state.studentIds);
+    final ids = Set<String>.from(state.studentIds);
     final map = Map<String, Student>.from(state.studentMap);
 
     for (var student in list) {
@@ -182,21 +182,17 @@ final class StudentsOverviewBloc
     final map = Map<String, Student>.from(state.studentMap);
 
     map[student.id] = student;
-    return state.copyWith(studentIds: ids.toList(), studentMap: map);
+    return state.copyWith(studentIds: ids, studentMap: map);
   }
 
   StudentsOverviewState _removeStudent(String id) {
-    final ids = List<String>.from(state.studentIds);
+    final ids = Set<String>.from(state.studentIds);
     final map = Map<String, Student>.from(state.studentMap);
 
     ids.remove(id);
     map.remove(id);
 
     return state.copyWith(studentIds: ids, studentMap: map);
-  }
-
-  Student getStudentById(String id) {
-    return state.studentMap[id]!;
   }
 
   @override
