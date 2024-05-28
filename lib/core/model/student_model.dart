@@ -104,6 +104,10 @@ class Student {
   }
 
   String get fullName => "$firstName $lastName";
+  String get dobString =>
+      "${dateOfBirth.day.toString().padLeft(2, '0')}-${dateOfBirth.month.toString().padLeft(2, '0')}-${dateOfBirth.year}";
+  String get genderString =>
+      gender.name.replaceFirst(gender.name[0], gender.name[0].toUpperCase());
 
   @override
   bool operator ==(Object other) {

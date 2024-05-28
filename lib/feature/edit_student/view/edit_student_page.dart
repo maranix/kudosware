@@ -1,5 +1,3 @@
-import 'dart:async';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -19,7 +17,7 @@ class EditStudentPage extends StatelessWidget {
           repo: context.read<StudentRepository>(),
           student: student,
         ),
-        child: const _EditStudentView(),
+        child: const EditStudentPage(),
       ),
     );
   }
@@ -28,17 +26,15 @@ class EditStudentPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return BlocListener<EditStudentBloc, EditStudentState>(
       listenWhen: (prev, curr) {
-        return prev.status != curr.status &&
-            curr.status == EditStudentStatus.success;
+        return prev.status != curr.status;
       },
       listener: (context, state) {
         return switch (state.status) {
-          EditStudentStatus.failure =>
-            ScaffoldMessenger.of(context).showSnackBar(
+          EditStudentStatus.failure => ScaffoldMessenger.of(context)
+            ..hideCurrentSnackBar()
+            ..showSnackBar(
               SnackBar(
-                content: Text(
-                  state.errorMessage ?? 'An unknown error occurred.',
-                ),
+                content: Text(state.errorMessage!),
               ),
             ),
           EditStudentStatus.success => Navigator.of(context).pop(),
@@ -90,15 +86,15 @@ class _FirstNameField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final status = context.select<EditStudentBloc, EditStudentStatus>(
-        (bloc) => bloc.state.status);
+    final isEnabled = context.select<EditStudentBloc, bool>(
+        (bloc) => bloc.state.status != EditStudentStatus.loading);
     final initialValue = context.read<EditStudentBloc>().state.firstName;
 
     return TextFormField(
       key: const Key('editStudentView_firstName_textFormField'),
       initialValue: initialValue,
       decoration: InputDecoration(
-        enabled: status != EditStudentStatus.loading,
+        enabled: isEnabled,
         labelText: 'First Name',
         hintText: 'John',
       ),
@@ -114,15 +110,15 @@ class _LastNameField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final status = context.select<EditStudentBloc, EditStudentStatus>(
-        (bloc) => bloc.state.status);
+    final isEnabled = context.select<EditStudentBloc, bool>(
+        (bloc) => bloc.state.status != EditStudentStatus.loading);
     final initialValue = context.read<EditStudentBloc>().state.lastName;
 
     return TextFormField(
       key: const Key('editStudentView_lastName_textFormField'),
       initialValue: initialValue,
       decoration: InputDecoration(
-        enabled: status != EditStudentStatus.loading,
+        enabled: isEnabled,
         labelText: 'Last Name',
         hintText: 'Doe',
       ),
@@ -138,63 +134,92 @@ class _GenderField extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isEnabled = context.select<EditStudentBloc, bool>(
+        (bloc) => bloc.state.status != EditStudentStatus.loading);
     final initialValue = context.read<EditStudentBloc>().state.gender;
 
     return DropdownButtonFormField(
       key: const Key('editStudentView_gender_textFormField'),
       value: initialValue.isEmpty ? 'other' : initialValue,
+      decoration: InputDecoration(
+        enabled: isEnabled,
+        labelText: 'Gender',
+        hintText: 'Other',
+      ),
       items: GenderEnum.values.map((g) {
         return DropdownMenuItem<String>(
           value: g.name,
-          child: Text(g.name),
+          child: Text(g.name.replaceFirst(g.name[0], g.name[0].toUpperCase())),
         );
       }).toList(),
       onChanged: (value) {
-        context
-            .read<EditStudentBloc>()
-            .add(EditStudentGenderChanged(value ?? ''));
+        if (value == null) return;
+        context.read<EditStudentBloc>().add(EditStudentGenderChanged(value));
       },
     );
   }
 }
 
-class _DOBPicker extends StatelessWidget {
+class _DOBPicker extends StatefulWidget {
   const _DOBPicker();
 
   @override
+  State<_DOBPicker> createState() => _DOBPickerState();
+}
+
+class _DOBPickerState extends State<_DOBPicker> {
+  late TextEditingController _controller;
+
+  void _updateControllerText(DateTime date) {
+    _controller.text = _formatDate(date);
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final isLoading = context.select<EditStudentBloc, bool>(
-        (bloc) => bloc.state.status == EditStudentStatus.loading);
+    final isEnabled = context.select<EditStudentBloc, bool>(
+        (bloc) => bloc.state.status != EditStudentStatus.loading);
     final dob =
         context.select<EditStudentBloc, DateTime>((bloc) => bloc.state.dob);
+    _updateControllerText(dob);
 
-    return TextButton(
-      onPressed: isLoading
-          ? null
-          : () async {
-              final pickedDOB = await showDatePicker(
-                context: context,
-                initialDate: dob,
-                firstDate: DateTime(1900),
-                lastDate: DateTime.now(),
-              );
-
-              if (pickedDOB != null) {
-                scheduleMicrotask(() {
-                  context
-                      .read<EditStudentBloc>()
-                      .add(EditStudentDOBChanged(pickedDOB));
-                });
-              }
-            },
-      child: Text(
-        _formatDate(dob),
+    return TextFormField(
+      key: const Key('editStudentView_lastName_textFormField'),
+      controller: _controller,
+      decoration: InputDecoration(
+        enabled: isEnabled,
+        labelText: 'Date of Birth',
+        hintText: '01/01/1900',
       ),
+      onTap: () async {
+        FocusScope.of(context).requestFocus(FocusNode());
+
+        final pickedDOB = await showDatePicker(
+          context: context,
+          initialDate: dob,
+          firstDate: DateTime(1900),
+          lastDate: DateTime.now(),
+        );
+        if (pickedDOB != null && context.mounted) {
+          context.read<EditStudentBloc>().add(EditStudentDOBChanged(pickedDOB));
+        }
+      },
     );
   }
 
   String _formatDate(DateTime date) {
-    return "${date.day}/${date.month}/${date.year}";
+    return "${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}";
   }
 }
 

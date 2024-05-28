@@ -56,10 +56,10 @@ final class StudentsOverviewFetchMoreRequested extends StudentsOverviewEvent {
 
 final class StudentsOverviewStudentDeletionRequested
     extends StudentsOverviewEvent {
-  const StudentsOverviewStudentDeletionRequested(this.student);
+  const StudentsOverviewStudentDeletionRequested(this.studentId);
 
-  final Student student;
+  final String studentId;
 
   @override
-  List<Object> get props => [student];
+  List<Object> get props => [studentId];
 }

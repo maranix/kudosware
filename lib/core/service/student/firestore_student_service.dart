@@ -60,7 +60,6 @@ final class FirestoreStudentService implements StudentService {
     final data = student.toFirestore();
 
     await ref.update(data);
-
     return student;
   }
 

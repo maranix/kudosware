@@ -145,11 +145,11 @@ final class StudentsOverviewBloc
     StudentsOverviewStudentDeletionRequested event,
     Emitter<StudentsOverviewState> emit,
   ) async {
-    final res = await _repo.delete(event.student.id);
+    final res = await _repo.delete(event.studentId);
 
     switch (res) {
       case ApiResponseSuccess():
-        final newState = _removeStudent(event.student.id);
+        final newState = _removeStudent(event.studentId);
         emit(newState);
       case ApiResponseFailure():
         emit(

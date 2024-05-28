@@ -73,21 +73,19 @@ final class EditStudentBloc extends Bloc<EditStudentEvent, EditStudentState> {
     EditStudentSubmitted event,
     Emitter<EditStudentState> emit,
   ) async {
-    emit(
-      state.copyWith(
-        status: EditStudentStatus.loading,
-      ),
-    );
+    emit(state.copyWith(status: EditStudentStatus.loading));
 
-    final currentDateTime = DateTime.now();
+    var student = switch (_student) {
+      null => Student.empty(),
+      _ => _student,
+    };
 
-    final student = Student.empty().copyWith(
+    student = student.copyWith(
       firstName: state.firstName,
       lastName: state.lastName,
       gender: GenderEnum.values.firstWhere((v) => v.name == state.gender),
       dateOfBirth: state.dob,
-      createdAt: _student?.createdAt ?? currentDateTime,
-      updatedAt: currentDateTime,
+      updatedAt: DateTime.now(),
     );
 
     ApiResponse<Student> res;
