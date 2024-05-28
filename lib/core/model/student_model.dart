@@ -1,6 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:kudosware/core/enums.dart';
 import 'package:kudosware/core/exception/exception.dart';
-import 'package:kudosware/core/model/model.dart';
 
 class Student {
   const Student({
@@ -38,7 +38,7 @@ class Student {
           'id': String id,
           'first_name': String firstName,
           'last_name': String lastName,
-          'gender': GenderEnum gender,
+          'gender': String gender,
           'date_of_birth': Timestamp dateOfBirth,
           'created_at': Timestamp createdAt,
           'updated_at': Timestamp updatedAt,
@@ -47,7 +47,9 @@ class Student {
         id: id,
         firstName: firstName,
         lastName: lastName,
-        gender: gender,
+        gender: GenderEnum.values.firstWhere(
+          (e) => e.name == gender,
+        ),
         dateOfBirth: dateOfBirth.toDate(),
         createdAt: createdAt.toDate(),
         updatedAt: updatedAt.toDate(),
@@ -100,6 +102,12 @@ class Student {
       updatedAt: dummyDate,
     );
   }
+
+  String get fullName => "$firstName $lastName";
+  String get dobString =>
+      "${dateOfBirth.day.toString().padLeft(2, '0')}-${dateOfBirth.month.toString().padLeft(2, '0')}-${dateOfBirth.year}";
+  String get genderString =>
+      gender.name.replaceFirst(gender.name[0], gender.name[0].toUpperCase());
 
   @override
   bool operator ==(Object other) {

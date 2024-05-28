@@ -4,16 +4,18 @@ import 'package:kudosware/core/service/student/student_service.dart';
 
 final class FirestoreStudentService implements StudentService {
   FirestoreStudentService({
-    FirebaseFirestore? firestore,
-  }) : _firestore = firestore ?? FirebaseFirestore.instance;
+    required FirebaseFirestore firestore,
+  }) : _firestore = firestore;
 
   final FirebaseFirestore _firestore;
 
   static const _collectionName = "students";
 
-  Future<FirebasePagedData<List<Student>>> getStudents({
+  @override
+  Future<({List<Student> data, DocumentSnapshot<Object?>? lastDoc})>
+      getStudents({
     required int limit,
-    Query<Student>? next,
+    DocumentSnapshot<Object?>? lastReceived,
   }) async {
     final query = _firestore
         .collection(_collectionName)
@@ -22,23 +24,19 @@ final class FirestoreStudentService implements StudentService {
               Student.fromFirestore(snapshot, options),
           toFirestore: (model, options) => model.toFirestore(),
         )
-        .orderBy('createdAt', descending: true);
+        .orderBy('updated_at', descending: true)
+        .limit(limit);
 
-    QuerySnapshot res;
-    if (next != null) {
-      res = await next.limit(limit).get();
+    QuerySnapshot<Student> res;
+    if (lastReceived != null) {
+      res = await query.startAfterDocument(lastReceived).get();
     } else {
-      res = await query.limit(limit).get();
+      res = await query.get();
     }
 
-    final students = res.docs.map((d) => d.data()).toList().cast<Student>();
-
-    if (res.docs.isEmpty) {
-      return FirebasePagedData(data: students);
-    } else {
-      final nextQuery = query.startAfterDocument(res.docs.last);
-      return FirebasePagedData(data: students, next: nextQuery);
-    }
+    final lastDoc = res.docs.isEmpty ? null : res.docs.last;
+    final students = res.docs.map((d) => d.data()).toList();
+    return (data: students, lastDoc: lastDoc);
   }
 
   @override
@@ -62,7 +60,6 @@ final class FirestoreStudentService implements StudentService {
     final data = student.toFirestore();
 
     await ref.update(data);
-
     return student;
   }
 
@@ -70,4 +67,15 @@ final class FirestoreStudentService implements StudentService {
   Future<void> delete(String studentId) async {
     await _firestore.collection(_collectionName).doc(studentId).delete();
   }
+
+  Stream<QuerySnapshot<Student>> get studentCollectionChangesStream =>
+      _firestore
+          .collection(_collectionName)
+          .withConverter<Student>(
+            fromFirestore: (snapshot, options) =>
+                Student.fromFirestore(snapshot, options),
+            toFirestore: (model, options) => model.toFirestore(),
+          )
+          .orderBy('updated_at', descending: true)
+          .snapshots();
 }
