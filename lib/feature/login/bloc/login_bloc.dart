@@ -13,7 +13,6 @@ final class LogInBloc extends Bloc<LogInEvent, LogInState> {
         super(const LogInState()) {
     on<LogInEmailChanged>(_onEmailChanged);
     on<LogInPasswordChanged>(_onPasswordChanged);
-    on<LogInConfirmPasswordChanged>(_onConfirmPasswordChanged);
     on<LogInRequested>(_onRequested);
   }
 
@@ -29,13 +28,6 @@ final class LogInBloc extends Bloc<LogInEvent, LogInState> {
     Emitter<LogInState> emit,
   ) async {
     emit(state.copyWith(password: event.password));
-  }
-
-  Future<void> _onConfirmPasswordChanged(
-    LogInConfirmPasswordChanged event,
-    Emitter<LogInState> emit,
-  ) async {
-    emit(state.copyWith(confirmPassword: event.password));
   }
 
   Future<void> _onRequested(

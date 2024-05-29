@@ -25,15 +25,6 @@ final class LogInPasswordChanged extends LogInEvent {
   List<Object> get props => [password];
 }
 
-final class LogInConfirmPasswordChanged extends LogInEvent {
-  const LogInConfirmPasswordChanged(this.password);
-
-  final String password;
-
-  @override
-  List<Object> get props => [password];
-}
-
 final class LogInRequested extends LogInEvent {
   const LogInRequested();
 }
