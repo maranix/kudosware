@@ -1,10 +1,9 @@
-import 'dart:math';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kudosware/core/repository/authentication_repository.dart';
 import 'package:kudosware/feature/login/login.dart';
+import 'package:kudosware/feature/signup/signup.dart';
 
 class LogInPage extends StatelessWidget {
   const LogInPage({super.key});
@@ -48,6 +47,10 @@ class _LogInView extends StatelessWidget {
                 children: [
                   _Title(),
                   _LogInFormView(),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: _SignUpActionButton(),
+                  ),
                   Center(
                     child: _LogInActionButton(),
                   ),
@@ -151,6 +154,18 @@ class _LogInActionButton extends StatelessWidget {
         firstChild: const Text('Login'),
         secondChild: const CupertinoActivityIndicator(),
       ),
+    );
+  }
+}
+
+class _SignUpActionButton extends StatelessWidget {
+  const _SignUpActionButton();
+
+  @override
+  Widget build(BuildContext context) {
+    return TextButton(
+      onPressed: () => Navigator.of(context).push(SignUpPage.route()),
+      child: const Text('Don\'t have an account?'),
     );
   }
 }

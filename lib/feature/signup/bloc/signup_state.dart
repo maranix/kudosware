@@ -2,6 +2,12 @@ part of 'signup_bloc.dart';
 
 enum SignUpStatus { inital, loading, success, failure }
 
+extension SignUpStatusX on SignUpStatus {
+  bool get isLoading => this == SignUpStatus.loading;
+
+  bool get isNotLoading => this != SignUpStatus.loading;
+}
+
 final class SignUpState extends Equatable {
   const SignUpState({
     this.status = SignUpStatus.inital,
