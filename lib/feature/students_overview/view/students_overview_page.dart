@@ -29,9 +29,6 @@ class _StudentsOverviewView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Kudosware'),
-      ),
       body: BlocConsumer<StudentsOverviewBloc, StudentsOverviewState>(
         listenWhen: (previous, current) => previous.status != current.status,
         listener: (context, state) {
@@ -108,7 +105,8 @@ class _EditStudentButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return IconButton(
+    return IconButton.filled(
+      color: Theme.of(context).iconTheme.color,
       onPressed: () =>
           Navigator.of(context).push(EditStudentPage.route(student: student)),
       icon: const Icon(Icons.edit),
@@ -123,7 +121,8 @@ class _DeleteStudentButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return IconButton(
+    return IconButton.filledTonal(
+      color: Colors.red,
       onPressed: () async {
         final deletionConfirmed = await showAdaptiveDialog<bool>(
             context: context,

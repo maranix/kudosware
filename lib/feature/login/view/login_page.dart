@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -7,18 +9,19 @@ import 'package:kudosware/feature/login/login.dart';
 class LogInPage extends StatelessWidget {
   const LogInPage({super.key});
 
-  static MaterialPageRoute<void> route() {
-    return MaterialPageRoute(
-      builder: (context) {
-        final repo = context.read<AuthenticationRepository>();
+  @override
+  Widget build(BuildContext context) {
+    final repo = context.read<AuthenticationRepository>();
 
-        return BlocProvider(
-          create: (BuildContext context) => LogInBloc(authRepo: repo),
-          child: const LogInPage(),
-        );
-      },
+    return BlocProvider(
+      create: (BuildContext context) => LogInBloc(authRepo: repo),
+      child: const _LogInView(),
     );
   }
+}
+
+class _LogInView extends StatelessWidget {
+  const _LogInView();
 
   @override
   Widget build(BuildContext context) {
@@ -35,31 +38,39 @@ class LogInPage extends StatelessWidget {
             );
         }
       },
-      child: const _LoginView(),
+      child: const Scaffold(
+        body: SafeArea(
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  _Title(),
+                  _LogInFormView(),
+                  Center(
+                    child: _LogInActionButton(),
+                  ),
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }
 
-class _LoginView extends StatelessWidget {
-  const _LoginView();
+class _LogInFormView extends StatelessWidget {
+  const _LogInFormView();
 
   @override
   Widget build(BuildContext context) {
-    return const Scaffold(
-      body: SingleChildScrollView(
-        child: Padding(
-          padding: EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              _Title(),
-              _EmailField(),
-              _PasswordField(),
-              _LogInActionButton(),
-            ],
-          ),
-        ),
-      ),
+    return const Column(
+      children: [
+        _EmailField(),
+        _PasswordField(),
+      ],
     );
   }
 }
@@ -72,8 +83,10 @@ class _Title extends StatelessWidget {
     final text = Theme.of(context).textTheme;
 
     return Text(
-      'Time to Dive In',
-      style: text.displaySmall,
+      'Time to\nDive In',
+      style: text.displayLarge?.copyWith(
+        fontWeight: FontWeight.bold,
+      ),
     );
   }
 }
@@ -129,7 +142,7 @@ class _LogInActionButton extends StatelessWidget {
     final isEnabled = context
         .select<LogInBloc, bool>((bloc) => bloc.state.status.isNotLoading);
 
-    return ElevatedButton(
+    return FilledButton(
       onPressed: () => context.read<LogInBloc>().add(const LogInRequested()),
       child: AnimatedCrossFade(
         crossFadeState:

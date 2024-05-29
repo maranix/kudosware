@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:kudosware/core/exception/exception.dart';
 import 'package:kudosware/core/model/model.dart';
 import 'package:kudosware/core/service/service.dart';
@@ -20,6 +21,9 @@ final class AuthenticationRepository {
       return ApiResponse.success(user);
     } on BaseException catch (e) {
       return ApiResponse.failure(e.message);
+    } on FirebaseException catch (e) {
+      return ApiResponse.failure(
+          e.message ?? 'Something went wrong, Please try again later.');
     }
   }
 
@@ -30,6 +34,9 @@ final class AuthenticationRepository {
       return ApiResponse.success(user);
     } on BaseException catch (e) {
       return ApiResponse.failure(e.message);
+    } on FirebaseException catch (e) {
+      return ApiResponse.failure(
+          e.message ?? 'Something went wrong, Please try again later.');
     }
   }
 
@@ -40,6 +47,9 @@ final class AuthenticationRepository {
       return ApiResponse.success(null);
     } on BaseException catch (e) {
       return ApiResponse.failure(e.message);
+    } on FirebaseException catch (e) {
+      return ApiResponse.failure(
+          e.message ?? 'Something went wrong, Please try again later.');
     }
   }
 

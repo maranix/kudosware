@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kudosware/app/app.dart';
 import 'package:kudosware/core/repository/repository.dart';
 import 'package:kudosware/feature/home/home.dart';
+import 'package:kudosware/feature/login/login.dart';
 
 class KudoswareApp extends StatelessWidget {
   const KudoswareApp({super.key});
@@ -53,11 +54,7 @@ class _AuthStatusPage extends StatelessWidget {
 
     return switch (status) {
       AppStatus.authenticated => const HomePage(),
-      AppStatus.unauthenticated => const Scaffold(
-          body: Center(
-            child: Text('Login'),
-          ),
-        ),
+      AppStatus.unauthenticated => const LogInPage(),
     };
   }
 }
