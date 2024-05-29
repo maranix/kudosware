@@ -2,6 +2,12 @@ part of 'login_bloc.dart';
 
 enum LogInStatus { inital, loading, success, failure }
 
+extension LogInStatusX on LogInStatus {
+  bool get isLoading => this == LogInStatus.loading;
+
+  bool get isNotLoading => this != LogInStatus.loading;
+}
+
 final class LogInState extends Equatable {
   const LogInState({
     this.status = LogInStatus.inital,
