@@ -1,6 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:kudosware/app/app.dart';
 import 'package:kudosware/core/repository/authentication_repository.dart';
 import 'package:kudosware/feature/signup/signup.dart';
 
@@ -34,15 +35,18 @@ class _SignUpView extends StatelessWidget {
     return BlocListener<SignUpBloc, SignUpState>(
       listenWhen: (prev, curr) => prev.status != curr.status,
       listener: (context, state) {
-        if (state.status == SignUpStatus.failure) {
-          ScaffoldMessenger.of(context)
+        return switch (state.status) {
+          SignUpStatus.failure => ScaffoldMessenger.of(context)
             ..hideCurrentSnackBar()
             ..showSnackBar(
               SnackBar(
                 content: Text(state.errorMessage!),
               ),
-            );
-        }
+            ),
+          SignUpStatus.success =>
+            context.read<AppBloc>().add(AppUserChanged(state.user!)),
+          _ => null,
+        };
       },
       child: Scaffold(
         appBar: AppBar(),

@@ -73,6 +73,7 @@ final class SignUpBloc extends Bloc<SignUpEvent, SignUpState> {
       ApiResponseSuccess() => emit(
           state.copyWith(
             status: SignUpStatus.success,
+            user: res.data,
             errorMessage: null,
           ),
         ),

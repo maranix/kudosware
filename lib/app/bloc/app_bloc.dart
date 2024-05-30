@@ -13,11 +13,11 @@ final class AppBloc extends Bloc<AppEvent, AppState> {
     required AuthenticationRepository authRepo,
   })  : _authRepo = authRepo,
         super(const AppState.unauthenticated()) {
-    on<_AppUserChanged>(_onUserChanged);
+    on<AppUserChanged>(_onUserChanged);
     on<AppLogoutRequested>(_onLogoutRequested);
 
     _authSubscription = _authRepo.authStateStream.listen(
-      (user) => add(_AppUserChanged(user)),
+      (user) => add(AppUserChanged(user)),
     );
   }
 
@@ -25,7 +25,7 @@ final class AppBloc extends Bloc<AppEvent, AppState> {
 
   late final StreamSubscription<User> _authSubscription;
 
-  void _onUserChanged(_AppUserChanged event, Emitter<AppState> emit) {
+  void _onUserChanged(AppUserChanged event, Emitter<AppState> emit) {
     emit(
       event.user.isNotEmpty
           ? AppState.authenticated(event.user)

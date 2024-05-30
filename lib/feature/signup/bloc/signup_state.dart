@@ -16,6 +16,7 @@ final class SignUpState extends Equatable {
     this.email = '',
     this.password = '',
     this.confirmPassword = '',
+    this.user,
     this.errorMessage,
   });
 
@@ -31,6 +32,8 @@ final class SignUpState extends Equatable {
 
   final String confirmPassword;
 
+  final User? user;
+
   final String? errorMessage;
 
   SignUpState copyWith({
@@ -40,6 +43,7 @@ final class SignUpState extends Equatable {
     String? email,
     String? password,
     String? confirmPassword,
+    User? user,
     String? errorMessage,
   }) {
     return SignUpState(
@@ -49,6 +53,7 @@ final class SignUpState extends Equatable {
       email: email ?? this.email,
       password: password ?? this.password,
       confirmPassword: confirmPassword ?? this.confirmPassword,
+      user: user ?? this.user,
       errorMessage: errorMessage ?? this.errorMessage,
     );
   }
@@ -61,6 +66,7 @@ final class SignUpState extends Equatable {
         email,
         password,
         confirmPassword,
+        user,
         errorMessage,
       ];
 }
