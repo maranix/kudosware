@@ -35,6 +35,11 @@ class _SignUpView extends StatelessWidget {
     return BlocListener<SignUpBloc, SignUpState>(
       listenWhen: (prev, curr) => prev.status != curr.status,
       listener: (context, state) {
+        void onSuccess() {
+          context.read<AppBloc>().add(AppUserChanged(state.user!));
+          Navigator.of(context).pop();
+        }
+
         return switch (state.status) {
           SignUpStatus.failure => ScaffoldMessenger.of(context)
             ..hideCurrentSnackBar()
@@ -43,8 +48,7 @@ class _SignUpView extends StatelessWidget {
                 content: Text(state.errorMessage!),
               ),
             ),
-          SignUpStatus.success =>
-            context.read<AppBloc>().add(AppUserChanged(state.user!)),
+          SignUpStatus.success => onSuccess(),
           _ => null,
         };
       },
