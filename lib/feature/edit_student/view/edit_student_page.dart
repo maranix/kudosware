@@ -7,23 +7,36 @@ import 'package:kudosware/core/repository/repository.dart';
 import 'package:kudosware/feature/edit_student/bloc/edit_student_bloc.dart';
 
 class EditStudentPage extends StatelessWidget {
-  const EditStudentPage({super.key});
+  const EditStudentPage({super.key, this.student});
+
+  final Student? student;
 
   static Route<void> route({Student? student}) {
     return MaterialPageRoute(
       fullscreenDialog: true,
-      builder: (context) => BlocProvider(
-        create: (context) => EditStudentBloc(
-          repo: context.read<StudentRepository>(),
-          student: student,
-        ),
-        child: const EditStudentPage(),
-      ),
+      builder: (context) => EditStudentPage(student: student),
     );
   }
 
   @override
   Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (context) => EditStudentBloc(
+        repo: context.read<StudentRepository>(),
+        student: student,
+      ),
+      child: const _EditStudentView(),
+    );
+  }
+}
+
+class _EditStudentView extends StatelessWidget {
+  const _EditStudentView();
+
+  @override
+  Widget build(BuildContext context) {
+    final isEditing = context.read<EditStudentBloc>().state.isEditing;
+
     return BlocListener<EditStudentBloc, EditStudentState>(
       listenWhen: (prev, curr) {
         return prev.status != curr.status;
@@ -41,42 +54,31 @@ class EditStudentPage extends StatelessWidget {
           _ => null,
         };
       },
-      child: const _EditStudentView(),
-    );
-  }
-}
-
-class _EditStudentView extends StatelessWidget {
-  const _EditStudentView();
-
-  @override
-  Widget build(BuildContext context) {
-    final isEditing = context.read<EditStudentBloc>().state.isEditing;
-
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          isEditing ? 'Edit Student' : 'Add Student',
-        ),
-      ),
-      body: const SingleChildScrollView(
-        child: Padding(
-          padding: EdgeInsets.all(16.0),
-          child: Column(
-            children: [
-              _FirstNameField(),
-              _LastNameField(),
-              Row(
-                children: [
-                  Expanded(child: _GenderField()),
-                  Expanded(child: _DOBPicker()),
-                ],
-              )
-            ],
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(
+            isEditing ? 'Edit Student' : 'Add Student',
           ),
         ),
+        body: const SingleChildScrollView(
+          child: Padding(
+            padding: EdgeInsets.all(16.0),
+            child: Column(
+              children: [
+                _FirstNameField(),
+                _LastNameField(),
+                Row(
+                  children: [
+                    Expanded(child: _GenderField()),
+                    Expanded(child: _DOBPicker()),
+                  ],
+                )
+              ],
+            ),
+          ),
+        ),
+        floatingActionButton: const _SubmitFloatingActionButton(),
       ),
-      floatingActionButton: const _SubmitFloatingActionButton(),
     );
   }
 }
