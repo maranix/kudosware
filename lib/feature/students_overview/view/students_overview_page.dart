@@ -5,9 +5,16 @@ import 'package:kudosware/core/model/model.dart';
 import 'package:kudosware/core/repository/repository.dart';
 import 'package:kudosware/feature/edit_student/edit_student.dart';
 import 'package:kudosware/feature/students_overview/bloc/students_overview_bloc.dart';
+import 'package:kudosware/widgets/widgets.dart';
 
 class StudentsOverviewPage extends StatelessWidget {
   const StudentsOverviewPage({super.key});
+
+  static MaterialPageRoute<void> route() {
+    return MaterialPageRoute(
+      builder: (context) => const StudentsOverviewPage(),
+    );
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -15,9 +22,7 @@ class StudentsOverviewPage extends StatelessWidget {
 
     return BlocProvider(
       create: (context) => StudentsOverviewBloc(repo: repo)
-        ..add(
-          const StudentsOverviewFetchRequested(),
-        ),
+        ..add(const StudentsOverviewFetchRequested()),
       child: const _StudentsOverviewView(),
     );
   }
@@ -29,6 +34,12 @@ class _StudentsOverviewView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('Kudosware'),
+        actions: const [
+          AppBarLogoutButton(),
+        ],
+      ),
       body: BlocConsumer<StudentsOverviewBloc, StudentsOverviewState>(
         listenWhen: (previous, current) => previous.status != current.status,
         listener: (context, state) {

@@ -7,20 +7,30 @@ import 'package:kudosware/core/repository/repository.dart';
 import 'package:kudosware/feature/edit_student/bloc/edit_student_bloc.dart';
 
 class EditStudentPage extends StatelessWidget {
-  const EditStudentPage({super.key});
+  const EditStudentPage({super.key, this.student});
 
-  static Route<void> route({Student? student}) {
+  final Student? student;
+
+  static MaterialPageRoute<void> route({Student? student}) {
     return MaterialPageRoute(
-      fullscreenDialog: true,
-      builder: (context) => BlocProvider(
-        create: (context) => EditStudentBloc(
-          repo: context.read<StudentRepository>(),
-          student: student,
-        ),
-        child: const EditStudentPage(),
-      ),
+      builder: (context) => EditStudentPage(student: student),
     );
   }
+
+  @override
+  Widget build(BuildContext context) {
+    return BlocProvider(
+      create: (context) => EditStudentBloc(
+        repo: context.read<StudentRepository>(),
+        student: student,
+      ),
+      child: const _EditStudentView(),
+    );
+  }
+}
+
+class _EditStudentView extends StatelessWidget {
+  const _EditStudentView();
 
   @override
   Widget build(BuildContext context) {
@@ -41,42 +51,33 @@ class EditStudentPage extends StatelessWidget {
           _ => null,
         };
       },
-      child: const _EditStudentView(),
-    );
-  }
-}
-
-class _EditStudentView extends StatelessWidget {
-  const _EditStudentView();
-
-  @override
-  Widget build(BuildContext context) {
-    final isEditing = context.read<EditStudentBloc>().state.isEditing;
-
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          isEditing ? 'Edit Student' : 'Add Student',
-        ),
-      ),
-      body: const SingleChildScrollView(
-        child: Padding(
-          padding: EdgeInsets.all(16.0),
-          child: Column(
-            children: [
-              _FirstNameField(),
-              _LastNameField(),
-              Row(
-                children: [
-                  Expanded(child: _GenderField()),
-                  Expanded(child: _DOBPicker()),
-                ],
-              )
-            ],
+      child: Scaffold(
+        appBar: AppBar(
+          title: Text(
+            context.read<EditStudentBloc>().state.isEditing
+                ? 'Edit Student'
+                : 'Add Student',
           ),
         ),
+        body: const SingleChildScrollView(
+          child: Padding(
+            padding: EdgeInsets.all(16.0),
+            child: Column(
+              children: [
+                _FirstNameField(),
+                _LastNameField(),
+                Row(
+                  children: [
+                    Expanded(child: _GenderField()),
+                    Expanded(child: _DOBPicker()),
+                  ],
+                )
+              ],
+            ),
+          ),
+        ),
+        floatingActionButton: const _SubmitFloatingActionButton(),
       ),
-      floatingActionButton: const _SubmitFloatingActionButton(),
     );
   }
 }
@@ -228,20 +229,23 @@ class _SubmitFloatingActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isLoading = context.select<EditStudentBloc, bool>(
-        (bloc) => bloc.state.status == EditStudentStatus.loading);
-
-    return FloatingActionButton(
-      shape: const ContinuousRectangleBorder(
-        borderRadius: BorderRadius.all(Radius.circular(32)),
-      ),
-      onPressed: isLoading
-          ? null
-          : () =>
-              context.read<EditStudentBloc>().add(const EditStudentSubmitted()),
-      child: isLoading
-          ? const CupertinoActivityIndicator()
-          : const Icon(Icons.check_rounded),
+    return BlocSelector<EditStudentBloc, EditStudentState, bool>(
+      selector: (state) => state.status == EditStudentStatus.loading,
+      builder: (context, isLoading) {
+        return FloatingActionButton(
+          shape: const ContinuousRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(32)),
+          ),
+          onPressed: isLoading
+              ? null
+              : () => context
+                  .read<EditStudentBloc>()
+                  .add(const EditStudentSubmitted()),
+          child: isLoading
+              ? const CupertinoActivityIndicator()
+              : const Icon(Icons.check_rounded),
+        );
+      },
     );
   }
 }

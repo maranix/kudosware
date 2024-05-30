@@ -39,22 +39,24 @@ class _KudoswareView extends StatelessWidget {
           seedColor: const Color(0xff809bce),
         ),
       ),
-      home: const _AuthStatusPage(),
+      home: const _AuthGuard(),
     );
   }
 }
 
-class _AuthStatusPage extends StatelessWidget {
-  const _AuthStatusPage();
+class _AuthGuard extends StatelessWidget {
+  const _AuthGuard();
 
   @override
   Widget build(BuildContext context) {
-    final status =
-        context.select<AppBloc, AppStatus>((bloc) => bloc.state.status);
-
-    return switch (status) {
-      AppStatus.authenticated => const HomePage(),
-      AppStatus.unauthenticated => const LogInPage(),
-    };
+    return BlocSelector<AppBloc, AppState, AppStatus>(
+      selector: (state) => state.status,
+      builder: (context, status) {
+        return switch (status) {
+          AppStatus.authenticated => const HomePage(),
+          AppStatus.unauthenticated => const LogInPage(),
+        };
+      },
+    );
   }
 }
