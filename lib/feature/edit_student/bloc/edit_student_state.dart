@@ -19,7 +19,7 @@ final class EditStudentState extends Equatable {
     );
   }
 
-  factory EditStudentState.fromStudent(Student student) {
+  factory EditStudentState.fromStudent(StudentEntry student) {
     return EditStudentState._(
       status: EditStudentStatus.initial,
       firstName: student.firstName,

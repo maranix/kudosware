@@ -49,9 +49,7 @@ class _HomeViewBody extends StatelessWidget {
             KeepAlivePage(
               child: StudentsOverviewPage(),
             ),
-            KeepAlivePage(
-              child: EditStudentPage(),
-            ),
+            EditStudentPage(),
           ],
         );
       },

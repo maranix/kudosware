@@ -21,7 +21,7 @@ final class StudentsOverviewState extends Equatable {
 
   final Set<String> studentIds;
 
-  final Map<String, Student> studentMap;
+  final Map<String, StudentEntry> studentMap;
 
   final DocumentSnapshot<Object?>? lastReceivedDocument;
 
@@ -30,7 +30,7 @@ final class StudentsOverviewState extends Equatable {
   StudentsOverviewState copyWith({
     StudentsOverviewStatus? status,
     Set<String>? studentIds,
-    Map<String, Student>? studentMap,
+    Map<String, StudentEntry>? studentMap,
     DocumentSnapshot<Object?>? lastReceivedDocument,
     String? errorMessage,
   }) {

@@ -10,7 +10,7 @@ sealed class StudentsOverviewEvent extends Equatable {
 final class StudentsOverviewCollectionChanged extends StudentsOverviewEvent {
   const StudentsOverviewCollectionChanged(this.changeEvent);
 
-  final QuerySnapshot<Student> changeEvent;
+  final QuerySnapshot<StudentEntry> changeEvent;
 
   @override
   List<Object> get props => [changeEvent];
@@ -20,7 +20,7 @@ final class StudentsOverviewCollectionDocumentAdded
     extends StudentsOverviewEvent {
   const StudentsOverviewCollectionDocumentAdded(this.change);
 
-  final DocumentChange<Student> change;
+  final DocumentChange<StudentEntry> change;
 
   @override
   List<Object> get props => [change];
@@ -30,7 +30,7 @@ final class StudentsOverviewCollectionDocumentRemoved
     extends StudentsOverviewEvent {
   const StudentsOverviewCollectionDocumentRemoved(this.change);
 
-  final DocumentChange<Student> change;
+  final DocumentChange<StudentEntry> change;
 
   @override
   List<Object> get props => [change];
@@ -40,7 +40,7 @@ final class StudentsOverviewCollectionDocumentModified
     extends StudentsOverviewEvent {
   const StudentsOverviewCollectionDocumentModified(this.change);
 
-  final DocumentChange<Student> change;
+  final DocumentChange<StudentEntry> change;
 
   @override
   List<Object> get props => [change];

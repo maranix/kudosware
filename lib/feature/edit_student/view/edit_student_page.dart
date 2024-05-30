@@ -9,9 +9,9 @@ import 'package:kudosware/feature/edit_student/bloc/edit_student_bloc.dart';
 class EditStudentPage extends StatelessWidget {
   const EditStudentPage({super.key, this.student});
 
-  final Student? student;
+  final StudentEntry? student;
 
-  static MaterialPageRoute<void> route({Student? student}) {
+  static MaterialPageRoute<void> route({StudentEntry? student}) {
     return MaterialPageRoute(
       builder: (context) => EditStudentPage(student: student),
     );
@@ -39,6 +39,12 @@ class _EditStudentView extends StatelessWidget {
         return prev.status != curr.status;
       },
       listener: (context, state) {
+        void onSuccess() {
+          if (state.isEditing) {
+            Navigator.of(context).pop();
+          }
+        }
+
         return switch (state.status) {
           EditStudentStatus.failure => ScaffoldMessenger.of(context)
             ..hideCurrentSnackBar()
@@ -47,7 +53,7 @@ class _EditStudentView extends StatelessWidget {
                 content: Text(state.errorMessage!),
               ),
             ),
-          EditStudentStatus.success => Navigator.of(context).pop(),
+          EditStudentStatus.success => onSuccess(),
           _ => null,
         };
       },
