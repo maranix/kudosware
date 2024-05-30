@@ -8,6 +8,12 @@ import 'package:kudosware/feature/signup/signup.dart';
 class LogInPage extends StatelessWidget {
   const LogInPage({super.key});
 
+  static MaterialPageRoute<void> route() {
+    return MaterialPageRoute(
+      builder: (context) => const LogInPage(),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     final repo = context.read<AuthenticationRepository>();

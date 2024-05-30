@@ -11,9 +11,8 @@ class EditStudentPage extends StatelessWidget {
 
   final Student? student;
 
-  static Route<void> route({Student? student}) {
+  static MaterialPageRoute<void> route({Student? student}) {
     return MaterialPageRoute(
-      fullscreenDialog: true,
       builder: (context) => EditStudentPage(student: student),
     );
   }
@@ -35,8 +34,6 @@ class _EditStudentView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isEditing = context.read<EditStudentBloc>().state.isEditing;
-
     return BlocListener<EditStudentBloc, EditStudentState>(
       listenWhen: (prev, curr) {
         return prev.status != curr.status;
@@ -57,7 +54,9 @@ class _EditStudentView extends StatelessWidget {
       child: Scaffold(
         appBar: AppBar(
           title: Text(
-            isEditing ? 'Edit Student' : 'Add Student',
+            context.read<EditStudentBloc>().state.isEditing
+                ? 'Edit Student'
+                : 'Add Student',
           ),
         ),
         body: const SingleChildScrollView(
@@ -230,20 +229,23 @@ class _SubmitFloatingActionButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isLoading = context.select<EditStudentBloc, bool>(
-        (bloc) => bloc.state.status == EditStudentStatus.loading);
-
-    return FloatingActionButton(
-      shape: const ContinuousRectangleBorder(
-        borderRadius: BorderRadius.all(Radius.circular(32)),
-      ),
-      onPressed: isLoading
-          ? null
-          : () =>
-              context.read<EditStudentBloc>().add(const EditStudentSubmitted()),
-      child: isLoading
-          ? const CupertinoActivityIndicator()
-          : const Icon(Icons.check_rounded),
+    return BlocSelector<EditStudentBloc, EditStudentState, bool>(
+      selector: (state) => state.status == EditStudentStatus.loading,
+      builder: (context, isLoading) {
+        return FloatingActionButton(
+          shape: const ContinuousRectangleBorder(
+            borderRadius: BorderRadius.all(Radius.circular(32)),
+          ),
+          onPressed: isLoading
+              ? null
+              : () => context
+                  .read<EditStudentBloc>()
+                  .add(const EditStudentSubmitted()),
+          child: isLoading
+              ? const CupertinoActivityIndicator()
+              : const Icon(Icons.check_rounded),
+        );
+      },
     );
   }
 }

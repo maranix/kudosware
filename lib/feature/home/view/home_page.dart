@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:kudosware/app/app.dart';
 import 'package:kudosware/feature/edit_student/edit_student.dart';
 import 'package:kudosware/feature/home/bloc/home_bloc.dart';
 import 'package:kudosware/feature/students_overview/view/students_overview_page.dart';
@@ -9,7 +8,7 @@ import 'package:kudosware/widgets/widgets.dart';
 class HomePage extends StatelessWidget {
   const HomePage({super.key});
 
-  static Route route() {
+  static MaterialPageRoute<void> route() {
     return MaterialPageRoute(
       builder: (context) => const HomePage(),
     );
@@ -29,32 +28,9 @@ class _HomeView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<AppBloc, AppState>(
-      listenWhen: (prev, curr) => prev.user != curr.user,
-      listener: (context, state) {
-        if (!state.user.isEmailVerified) {
-          ScaffoldMessenger.of(context)
-            ..hideCurrentMaterialBanner()
-            ..showMaterialBanner(
-              MaterialBanner(
-                backgroundColor: Colors.amber,
-                content: const Text(
-                    'A verification email has been sent to your email.'),
-                actions: [
-                  TextButton(
-                    onPressed: () => ScaffoldMessenger.of(context)
-                        .hideCurrentMaterialBanner(),
-                    child: const Text('Dismiss'),
-                  ),
-                ],
-              ),
-            );
-        }
-      },
-      child: const Scaffold(
-        body: _HomeViewBody(),
-        bottomNavigationBar: _BottomNavigationBar(),
-      ),
+    return const Scaffold(
+      body: _HomeViewBody(),
+      bottomNavigationBar: _BottomNavigationBar(),
     );
   }
 }

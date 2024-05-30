@@ -13,7 +13,6 @@ final class HomeBloc extends Bloc<HomeEvent, HomeState> {
     HomeTabChanged event,
     Emitter<HomeState> emit,
   ) {
-    print(event.tabIndex);
     emit(state.copyWith(activeIndex: event.tabIndex));
   }
 }

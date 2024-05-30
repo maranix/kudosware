@@ -10,7 +10,7 @@ import 'package:kudosware/widgets/widgets.dart';
 class StudentsOverviewPage extends StatelessWidget {
   const StudentsOverviewPage({super.key});
 
-  static Route route() {
+  static MaterialPageRoute<void> route() {
     return MaterialPageRoute(
       builder: (context) => const StudentsOverviewPage(),
     );
