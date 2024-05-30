@@ -1,4 +1,18 @@
-enum GenderEnum { male, female, other }
+enum GenderEnum {
+  male("Male"),
+  female("Female"),
+  other("Other");
+
+  factory GenderEnum.fromString(String value) {
+    return GenderEnum.values.firstWhere(
+      (v) => v.name == value,
+    );
+  }
+
+  const GenderEnum(this.value);
+
+  final String value;
+}
 
 enum FirebaseAuthExceptionCode {
   invalidEmail('invalid-email'),
