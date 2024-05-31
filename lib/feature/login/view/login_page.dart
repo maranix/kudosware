@@ -1,9 +1,12 @@
+import 'dart:math';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kudosware/core/repository/authentication_repository.dart';
 import 'package:kudosware/feature/login/login.dart';
 import 'package:kudosware/feature/signup/signup.dart';
+import 'package:kudosware/widgets/widgets.dart';
 
 class LogInPage extends StatelessWidget {
   const LogInPage({super.key});
@@ -43,21 +46,24 @@ class _LogInView extends StatelessWidget {
             );
         }
       },
-      child: const Scaffold(
+      child: Scaffold(
         body: SafeArea(
           child: SingleChildScrollView(
             child: Padding(
-              padding: EdgeInsets.all(16.0),
+              padding: const EdgeInsets.all(16.0),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _Title(),
-                  _LogInFormView(),
-                  Align(
+                  const _Title(),
+                  SizedBox(
+                    height: min(100, MediaQuery.sizeOf(context).height * 0.15),
+                  ),
+                  const _LogInFormView(),
+                  const Align(
                     alignment: Alignment.centerRight,
                     child: _SignUpActionButton(),
                   ),
-                  Center(
+                  const Center(
                     child: _LogInActionButton(),
                   ),
                 ],
@@ -78,6 +84,7 @@ class _LogInFormView extends StatelessWidget {
     return const Column(
       children: [
         _EmailField(),
+        SizedBox(height: 16),
         _PasswordField(),
       ],
     );
@@ -111,7 +118,7 @@ class _EmailField extends StatelessWidget {
 
     return TextFormField(
       key: const Key('loginUserView_email_textFormField'),
-      decoration: InputDecoration(
+      decoration: textFieldDecoration(
         enabled: isEnabled,
         labelText: 'Email',
         hintText: 'johndoe@gmail.com',
@@ -133,9 +140,11 @@ class _PasswordField extends StatelessWidget {
 
     return TextFormField(
       key: const Key('loginUserView_password_textFormField'),
-      decoration: InputDecoration(
+      obscureText: true,
+      decoration: textFieldDecoration(
         enabled: isEnabled,
         labelText: 'Password',
+        hintText: '*********',
       ),
       onChanged: (password) =>
           context.read<LogInBloc>().add(LogInPasswordChanged(password)),

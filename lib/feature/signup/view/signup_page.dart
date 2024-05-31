@@ -1,9 +1,13 @@
+import 'dart:math';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kudosware/app/app.dart';
 import 'package:kudosware/core/repository/authentication_repository.dart';
+import 'package:kudosware/core/utils/validators.dart';
 import 'package:kudosware/feature/signup/signup.dart';
+import 'package:kudosware/widgets/widgets.dart';
 
 class SignUpPage extends StatelessWidget {
   const SignUpPage({super.key});
@@ -54,42 +58,24 @@ class _SignUpView extends StatelessWidget {
       },
       child: Scaffold(
         appBar: AppBar(),
-        body: const SafeArea(
+        body: SafeArea(
           child: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _Title(),
-                _SignUpFormView(),
-                Center(
-                  child: _SignUpActionButton(),
-                )
-              ],
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const _Title(),
+                  SizedBox(
+                    height: min(50, MediaQuery.sizeOf(context).height * 1),
+                  ),
+                  const _SignUpFormView(),
+                ],
+              ),
             ),
           ),
         ),
       ),
-    );
-  }
-}
-
-class _SignUpFormView extends StatelessWidget {
-  const _SignUpFormView();
-
-  @override
-  Widget build(BuildContext context) {
-    return const Column(
-      children: [
-        Row(
-          children: [
-            Expanded(child: _FirstNameField()),
-            Expanded(child: _LastNameField()),
-          ],
-        ),
-        _EmailField(),
-        _PasswordField(),
-        _ConfirmPasswordField(),
-      ],
     );
   }
 }
@@ -110,6 +96,66 @@ class _Title extends StatelessWidget {
   }
 }
 
+class _SignUpFormView extends StatefulWidget {
+  const _SignUpFormView();
+
+  @override
+  State<_SignUpFormView> createState() => _SignUpFormViewState();
+}
+
+class _SignUpFormViewState extends State<_SignUpFormView> {
+  late final GlobalKey<FormState> _formKey;
+
+  void _onValidated() {
+    if (_formKey.currentState == null) return;
+
+    if (_formKey.currentState!.validate()) {
+      context.read<SignUpBloc>().add(const SignUpRequested());
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _formKey = GlobalKey<FormState>();
+  }
+
+  @override
+  void dispose() {
+    _formKey.currentState?.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Form(
+      key: _formKey,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          const Row(
+            children: [
+              Expanded(child: _FirstNameField()),
+              SizedBox(width: 8),
+              Expanded(child: _LastNameField()),
+            ],
+          ),
+          const _EmailField(),
+          const _PasswordField(),
+          const _ConfirmPasswordField(),
+          const SizedBox(height: 8),
+          _SignUpActionButton(onValidated: _onValidated)
+        ]
+            .map((child) => Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: child,
+                ))
+            .toList(),
+      ),
+    );
+  }
+}
+
 class _FirstNameField extends StatelessWidget {
   const _FirstNameField();
 
@@ -122,7 +168,8 @@ class _FirstNameField extends StatelessWidget {
 
     return TextFormField(
       key: const Key('signupUserView_firstName_textFormField'),
-      decoration: InputDecoration(
+      keyboardType: TextInputType.name,
+      decoration: textFieldDecoration(
         enabled: isEnabled,
         labelText: 'First Name',
         hintText: 'John',
@@ -130,6 +177,7 @@ class _FirstNameField extends StatelessWidget {
       initialValue: firstName,
       onChanged: (name) =>
           context.read<SignUpBloc>().add(SignUpFirstNameChanged(name)),
+      validator: validateFirstName,
     );
   }
 }
@@ -146,7 +194,8 @@ class _LastNameField extends StatelessWidget {
 
     return TextFormField(
       key: const Key('signupUserView_lastName_textFormField'),
-      decoration: InputDecoration(
+      keyboardType: TextInputType.name,
+      decoration: textFieldDecoration(
         enabled: isEnabled,
         labelText: 'Last Name',
         hintText: 'Doe',
@@ -154,6 +203,7 @@ class _LastNameField extends StatelessWidget {
       initialValue: lastName,
       onChanged: (name) =>
           context.read<SignUpBloc>().add(SignUpLastNameChanged(name)),
+      validator: validateLastName,
     );
   }
 }
@@ -170,7 +220,8 @@ class _EmailField extends StatelessWidget {
 
     return TextFormField(
       key: const Key('signupUserView_email_textFormField'),
-      decoration: InputDecoration(
+      keyboardType: TextInputType.emailAddress,
+      decoration: textFieldDecoration(
         enabled: isEnabled,
         labelText: 'Email',
         hintText: 'johndoe@gmail.com',
@@ -178,6 +229,7 @@ class _EmailField extends StatelessWidget {
       initialValue: email,
       onChanged: (email) =>
           context.read<SignUpBloc>().add(SignUpEmailChanged(email)),
+      validator: validateEmail,
     );
   }
 }
@@ -192,13 +244,15 @@ class _PasswordField extends StatelessWidget {
 
     return TextFormField(
       key: const Key('signupUserView_password_textFormField'),
-      decoration: InputDecoration(
+      keyboardType: TextInputType.visiblePassword,
+      decoration: textFieldDecoration(
         enabled: isEnabled,
         labelText: 'Password',
       ),
       obscureText: true,
       onChanged: (password) =>
           context.read<SignUpBloc>().add(SignUpPasswordChanged(password)),
+      validator: validatePassword,
     );
   }
 }
@@ -213,7 +267,8 @@ class _ConfirmPasswordField extends StatelessWidget {
 
     return TextFormField(
       key: const Key('signupUserView_confirmPassword_textFormField'),
-      decoration: InputDecoration(
+      keyboardType: TextInputType.visiblePassword,
+      decoration: textFieldDecoration(
         enabled: isEnabled,
         labelText: 'Confirm Password',
       ),
@@ -221,12 +276,18 @@ class _ConfirmPasswordField extends StatelessWidget {
       onChanged: (password) => context
           .read<SignUpBloc>()
           .add(SignUpConfirmPasswordChanged(password)),
+      validator: (cpass) => validateConfirmPassword(
+          cpass, context.read<SignUpBloc>().state.password),
     );
   }
 }
 
 class _SignUpActionButton extends StatelessWidget {
-  const _SignUpActionButton();
+  const _SignUpActionButton({
+    required this.onValidated,
+  });
+
+  final VoidCallback onValidated;
 
   @override
   Widget build(BuildContext context) {
@@ -234,7 +295,7 @@ class _SignUpActionButton extends StatelessWidget {
         .select<SignUpBloc, bool>((bloc) => bloc.state.status.isNotLoading);
 
     return FilledButton(
-      onPressed: () => context.read<SignUpBloc>().add(const SignUpRequested()),
+      onPressed: onValidated,
       child: AnimatedCrossFade(
         crossFadeState:
             isEnabled ? CrossFadeState.showFirst : CrossFadeState.showSecond,

@@ -1,10 +1,13 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kudosware/core/enums.dart';
 import 'package:kudosware/core/model/model.dart';
 import 'package:kudosware/core/repository/repository.dart';
+import 'package:kudosware/core/utils/validators.dart';
 import 'package:kudosware/feature/edit_student/bloc/edit_student_bloc.dart';
+import 'package:kudosware/widgets/widgets.dart';
 
 class EditStudentPage extends StatelessWidget {
   const EditStudentPage({super.key, this.student});
@@ -68,21 +71,66 @@ class _EditStudentView extends StatelessWidget {
         body: const SingleChildScrollView(
           child: Padding(
             padding: EdgeInsets.all(16.0),
-            child: Column(
-              children: [
-                _FirstNameField(),
-                _LastNameField(),
-                Row(
-                  children: [
-                    Expanded(child: _GenderField()),
-                    Expanded(child: _DOBPicker()),
-                  ],
-                )
-              ],
-            ),
+            child: _EditStudentForm(),
           ),
         ),
-        floatingActionButton: const _SubmitFloatingActionButton(),
+      ),
+    );
+  }
+}
+
+class _EditStudentForm extends StatefulWidget {
+  const _EditStudentForm();
+
+  @override
+  State<_EditStudentForm> createState() => _EditStudentFormState();
+}
+
+class _EditStudentFormState extends State<_EditStudentForm> {
+  late final GlobalKey<FormState> _formKey;
+
+  void _onValidated() {
+    if (_formKey.currentState == null) return;
+
+    if (_formKey.currentState!.validate()) {
+      context.read<EditStudentBloc>().add(const EditStudentSubmitted());
+    }
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    _formKey = GlobalKey<FormState>();
+  }
+
+  @override
+  void dispose() {
+    _formKey.currentState?.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Form(
+      key: _formKey,
+      child: Column(
+        children: [
+          const _FirstNameField(),
+          const _LastNameField(),
+          const Row(
+            children: [
+              Expanded(child: _GenderField()),
+              SizedBox(width: 8),
+              Expanded(child: _DOBPicker()),
+            ],
+          ),
+          _AddStudentButton(onValidated: _onValidated),
+        ]
+            .map((child) => Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 8),
+                  child: child,
+                ))
+            .toList(),
       ),
     );
   }
@@ -100,7 +148,7 @@ class _FirstNameField extends StatelessWidget {
     return TextFormField(
       key: const Key('editStudentView_firstName_textFormField'),
       initialValue: initialValue,
-      decoration: InputDecoration(
+      decoration: textFieldDecoration(
         enabled: isEnabled,
         labelText: 'First Name',
         hintText: 'John',
@@ -108,6 +156,7 @@ class _FirstNameField extends StatelessWidget {
       onChanged: (value) {
         context.read<EditStudentBloc>().add(EditStudentFirstNameChanged(value));
       },
+      validator: validateFirstName,
     );
   }
 }
@@ -124,7 +173,7 @@ class _LastNameField extends StatelessWidget {
     return TextFormField(
       key: const Key('editStudentView_lastName_textFormField'),
       initialValue: initialValue,
-      decoration: InputDecoration(
+      decoration: textFieldDecoration(
         enabled: isEnabled,
         labelText: 'Last Name',
         hintText: 'Doe',
@@ -132,6 +181,7 @@ class _LastNameField extends StatelessWidget {
       onChanged: (value) {
         context.read<EditStudentBloc>().add(EditStudentLastNameChanged(value));
       },
+      validator: validateLastName,
     );
   }
 }
@@ -148,7 +198,7 @@ class _GenderField extends StatelessWidget {
     return DropdownButtonFormField(
       key: const Key('editStudentView_gender_textFormField'),
       value: initialValue.isEmpty ? 'other' : initialValue,
-      decoration: InputDecoration(
+      decoration: textFieldDecoration(
         enabled: isEnabled,
         labelText: 'Gender',
         hintText: 'Other',
@@ -204,7 +254,8 @@ class _DOBPickerState extends State<_DOBPicker> {
     return TextFormField(
       key: const Key('editStudentView_lastName_textFormField'),
       controller: _controller,
-      decoration: InputDecoration(
+      keyboardType: TextInputType.datetime,
+      decoration: textFieldDecoration(
         enabled: isEnabled,
         labelText: 'Date of Birth',
         hintText: '01/01/1900',
@@ -230,26 +281,23 @@ class _DOBPickerState extends State<_DOBPicker> {
   }
 }
 
-class _SubmitFloatingActionButton extends StatelessWidget {
-  const _SubmitFloatingActionButton();
+class _AddStudentButton extends StatelessWidget {
+  const _AddStudentButton({
+    required this.onValidated,
+  });
+
+  final VoidCallback onValidated;
 
   @override
   Widget build(BuildContext context) {
     return BlocSelector<EditStudentBloc, EditStudentState, bool>(
       selector: (state) => state.status == EditStudentStatus.loading,
       builder: (context, isLoading) {
-        return FloatingActionButton(
-          shape: const ContinuousRectangleBorder(
-            borderRadius: BorderRadius.all(Radius.circular(32)),
-          ),
-          onPressed: isLoading
-              ? null
-              : () => context
-                  .read<EditStudentBloc>()
-                  .add(const EditStudentSubmitted()),
+        return FilledButton(
+          onPressed: isLoading ? null : onValidated,
           child: isLoading
               ? const CupertinoActivityIndicator()
-              : const Icon(Icons.check_rounded),
+              : const Text('Add Student'),
         );
       },
     );
