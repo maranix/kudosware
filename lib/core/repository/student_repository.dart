@@ -14,8 +14,7 @@ final class StudentRepository {
 
   static const _pageSize = 10;
 
-  final _studentCollectionStreamController =
-      StreamController<QuerySnapshot<StudentEntry>>.broadcast();
+  Stream<QuerySnapshot<StudentEntry>>? _studentsCollectionBroadcastStream;
 
   Future<ApiResponse<List<StudentEntry>>> getStudents({
     int limit = _pageSize,
@@ -121,16 +120,17 @@ final class StudentRepository {
       );
     }
 
-    if (_studentCollectionStreamController.hasListener) {
-      return _studentCollectionStreamController.stream;
+    if (_studentsCollectionBroadcastStream != null) {
+      return _studentsCollectionBroadcastStream!;
     }
 
-    _studentCollectionStreamController
-        .addStream(_service.studentCollectionChangesStream);
-    return _studentCollectionStreamController.stream;
+    final broadcastStream =
+        _service.studentCollectionChangesStream.asBroadcastStream();
+    _studentsCollectionBroadcastStream = broadcastStream;
+    return broadcastStream;
   }
 
   void dispose() {
-    _studentCollectionStreamController.close();
+    _studentsCollectionBroadcastStream = null;
   }
 }

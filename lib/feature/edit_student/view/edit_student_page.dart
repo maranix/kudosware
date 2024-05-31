@@ -102,7 +102,7 @@ class _EditStudentFormState extends State<_EditStudentForm> {
     // Some sort of race condition, i guess.
     // Not enough time to debug.
     Future.delayed(const Duration(milliseconds: 300), () {
-      _formKey.currentState!.reset();
+      _formKey.currentState?.reset();
       setState(() {});
     });
   }

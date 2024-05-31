@@ -24,7 +24,6 @@ final class StudentsOverviewBloc
     on<StudentsOverviewFetchRequested>(_onFetchRequested);
     on<StudentsOverviewFetchMoreRequested>(_onFetchMoreRequested);
     on<StudentsOverviewStudentDeletionRequested>(_onDeleteRequested);
-
     _studentCollectionChangesSubscription = _repo
         .firestoreStudentCollectionChangesStream
         .listen(_collectionlistener);
@@ -198,6 +197,7 @@ final class StudentsOverviewBloc
   @override
   Future<void> close() {
     _studentCollectionChangesSubscription?.cancel();
+    _repo.dispose();
     return super.close();
   }
 

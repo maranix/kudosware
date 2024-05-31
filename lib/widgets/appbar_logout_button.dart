@@ -9,7 +9,13 @@ class AppBarLogoutButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return IconButton.filledTonal(
       tooltip: 'Logout',
-      onPressed: () => context.read<AppBloc>().add(const AppLogoutRequested()),
+      onPressed: () {
+        ScaffoldMessenger.of(context)
+          ..clearSnackBars()
+          ..clearMaterialBanners();
+
+        context.read<AppBloc>().add(const AppLogoutRequested());
+      },
       icon: const Icon(Icons.logout),
     );
   }
