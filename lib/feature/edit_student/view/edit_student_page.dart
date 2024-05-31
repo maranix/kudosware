@@ -96,6 +96,17 @@ class _EditStudentFormState extends State<_EditStudentForm> {
     }
   }
 
+  void _resetForm() {
+    context.read<EditStudentBloc>().add(const EditStudentResetRequested());
+
+    // Some sort of race condition, i guess.
+    // Not enough time to debug.
+    Future.delayed(const Duration(milliseconds: 300), () {
+      _formKey.currentState!.reset();
+      setState(() {});
+    });
+  }
+
   @override
   void initState() {
     super.initState();
@@ -114,7 +125,7 @@ class _EditStudentFormState extends State<_EditStudentForm> {
       listenWhen: (prev, curr) => prev.status != curr.status,
       listener: (context, state) {
         return switch (state.status) {
-          EditStudentStatus.success => _formKey.currentState?.reset(),
+          EditStudentStatus.success => _resetForm(),
           _ => null,
         };
       },
@@ -203,31 +214,34 @@ class _GenderField extends StatelessWidget {
         (bloc) => bloc.state.status != EditStudentStatus.loading);
     final initialValue = context.read<EditStudentBloc>().state.gender;
 
-    return DropdownButtonFormField(
-      key: const Key('editStudentView_gender_textFormField'),
-      value: initialValue,
-      decoration: textFieldDecoration(
-        enabled: isEnabled,
-        labelText: 'Gender',
-        hintText: 'Other',
-      ),
-      items: GenderEnum.values.map((g) {
-        return DropdownMenuItem<String>(
-          value: g.name,
-          child: Text(g.value),
-        );
-      }).toList(),
-      onChanged: (value) {
-        if (value == null) return;
-        context.read<EditStudentBloc>().add(EditStudentGenderChanged(value));
-      },
-      validator: (value) {
-        if (value == null) {
-          return "Gender cannot be empty";
-        }
+    return IgnorePointer(
+      ignoring: !isEnabled,
+      child: DropdownButtonFormField(
+        key: const Key('editStudentView_gender_textFormField'),
+        value: initialValue,
+        decoration: textFieldDecoration(
+          enabled: isEnabled,
+          labelText: 'Gender',
+          hintText: 'Other',
+        ),
+        items: GenderEnum.values.map((g) {
+          return DropdownMenuItem<String>(
+            value: g.name,
+            child: Text(g.value),
+          );
+        }).toList(),
+        onChanged: (value) {
+          if (value == null) return;
+          context.read<EditStudentBloc>().add(EditStudentGenderChanged(value));
+        },
+        validator: (value) {
+          if (value == null) {
+            return "Gender cannot be empty";
+          }
 
-        return null;
-      },
+          return null;
+        },
+      ),
     );
   }
 }
@@ -242,17 +256,20 @@ class _DOBPicker extends StatefulWidget {
 class _DOBPickerState extends State<_DOBPicker> {
   late TextEditingController _controller;
 
+  void _updateController(EditStudentState state) {
+    if (state.dob == null) {
+      _controller.text = '';
+    } else {
+      _controller.text = _formatDate(state.dob!);
+    }
+  }
+
   @override
   void initState() {
     super.initState();
 
-    final date = context.read<EditStudentBloc>().state.dob;
-
-    if (date != null) {
-      _controller = TextEditingController(text: _formatDate(date));
-    } else {
-      _controller = TextEditingController();
-    }
+    _controller = TextEditingController();
+    _updateController(context.read<EditStudentBloc>().state);
   }
 
   @override
@@ -263,33 +280,40 @@ class _DOBPickerState extends State<_DOBPicker> {
 
   @override
   Widget build(BuildContext context) {
-    final isEnabled = context.select<EditStudentBloc, bool>(
-        (bloc) => bloc.state.status != EditStudentStatus.loading);
-
-    return TextFormField(
-      key: const Key('editStudentView_lastName_textFormField'),
-      controller: _controller,
-      keyboardType: TextInputType.datetime,
-      decoration: textFieldDecoration(
-        enabled: isEnabled,
-        labelText: 'Date of Birth',
-        hintText: '01/01/1900',
-      ),
-      onTap: () async {
-        final initialDate = context.read<EditStudentBloc>().state.dob;
-        final pickedDOB = await showDatePicker(
-          context: context,
-          initialDate: initialDate,
-          firstDate: DateTime(1900),
-          lastDate: DateTime.now(),
-        );
-        if (pickedDOB != null && context.mounted) {
-          context.read<EditStudentBloc>().add(EditStudentDOBChanged(pickedDOB));
-          _controller.text = _formatDate(pickedDOB);
-          FocusScope.of(context).unfocus();
-        }
+    return BlocSelector<EditStudentBloc, EditStudentState, bool>(
+      selector: (state) {
+        _updateController(state);
+        return state.status != EditStudentStatus.loading;
       },
-      validator: validateDate,
+      builder: (context, isEnabled) {
+        return TextFormField(
+          key: const Key('editStudentView_lastName_textFormField'),
+          controller: _controller,
+          keyboardType: TextInputType.datetime,
+          decoration: textFieldDecoration(
+            enabled: isEnabled,
+            labelText: 'Date of Birth',
+            hintText: '01/01/1900',
+          ),
+          onTap: () async {
+            FocusScope.of(context).requestFocus(FocusNode());
+
+            final initialDate = context.read<EditStudentBloc>().state.dob;
+            final pickedDOB = await showDatePicker(
+              context: context,
+              initialDate: initialDate,
+              firstDate: DateTime(1900),
+              lastDate: DateTime.now(),
+            );
+            if (pickedDOB != null && context.mounted) {
+              context
+                  .read<EditStudentBloc>()
+                  .add(EditStudentDOBChanged(pickedDOB));
+            }
+          },
+          validator: validateDate,
+        );
+      },
     );
   }
 

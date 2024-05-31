@@ -23,12 +23,13 @@ final class EditStudentBloc extends Bloc<EditStudentEvent, EditStudentState> {
     on<EditStudentGenderChanged>(_onGenderChanged);
     on<EditStudentDOBChanged>(_onDOBChanged);
     on<EditStudentSubmitted>(_onSubmitted);
+    on<EditStudentResetRequested>(_onResetRequested);
   }
 
-  Future<void> _onFirstNameChanged(
+  void _onFirstNameChanged(
     EditStudentFirstNameChanged event,
     Emitter<EditStudentState> emit,
-  ) async {
+  ) {
     emit(
       state.copyWith(
         firstName: event.firstName,
@@ -36,10 +37,10 @@ final class EditStudentBloc extends Bloc<EditStudentEvent, EditStudentState> {
     );
   }
 
-  Future<void> _onLastNameChanged(
+  void _onLastNameChanged(
     EditStudentLastNameChanged event,
     Emitter<EditStudentState> emit,
-  ) async {
+  ) {
     emit(
       state.copyWith(
         lastName: event.lastName,
@@ -47,10 +48,10 @@ final class EditStudentBloc extends Bloc<EditStudentEvent, EditStudentState> {
     );
   }
 
-  Future<void> _onGenderChanged(
+  void _onGenderChanged(
     EditStudentGenderChanged event,
     Emitter<EditStudentState> emit,
-  ) async {
+  ) {
     emit(
       state.copyWith(
         gender: event.gender,
@@ -58,10 +59,10 @@ final class EditStudentBloc extends Bloc<EditStudentEvent, EditStudentState> {
     );
   }
 
-  Future<void> _onDOBChanged(
+  void _onDOBChanged(
     EditStudentDOBChanged event,
     Emitter<EditStudentState> emit,
-  ) async {
+  ) {
     emit(
       state.copyWith(
         dob: event.dob,
@@ -109,6 +110,13 @@ final class EditStudentBloc extends Bloc<EditStudentEvent, EditStudentState> {
           ),
         ),
     };
+  }
+
+  void _onResetRequested(
+    EditStudentResetRequested event,
+    Emitter<EditStudentState> emit,
+  ) {
+    emit(EditStudentState());
   }
 
   final StudentRepository _repo;

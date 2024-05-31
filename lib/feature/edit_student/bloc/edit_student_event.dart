@@ -46,3 +46,7 @@ final class EditStudentDOBChanged extends EditStudentEvent {
 final class EditStudentSubmitted extends EditStudentEvent {
   const EditStudentSubmitted();
 }
+
+final class EditStudentResetRequested extends EditStudentEvent {
+  const EditStudentResetRequested();
+}
