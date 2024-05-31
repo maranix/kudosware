@@ -35,13 +35,9 @@ String? validateLastName(String? lastName) {
 String? validatePassword(String? password) {
   if (password?.isEmpty ?? true) {
     return 'Password is required';
-  } else if (password != null &&
-      !RegExp(r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$")
-          .hasMatch(password)) {
-    return 'Password must be at least 8 characters and include uppercase, lowercase, number, and symbol';
-  } else if (password!.length > 128) {
-    // Additional check: Password length limit
-    return 'Password is too long (limit: 128 characters)';
+  } else if (password!.length < 4) {
+    // Minimum length set to 4 for basic validation
+    return 'Password must be at least 4 characters long';
   }
   return null; // No error
 }
