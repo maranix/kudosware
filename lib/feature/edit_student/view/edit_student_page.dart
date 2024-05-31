@@ -334,11 +334,13 @@ class _AddStudentButton extends StatelessWidget {
     return BlocSelector<EditStudentBloc, EditStudentState, bool>(
       selector: (state) => state.status == EditStudentStatus.loading,
       builder: (context, isLoading) {
+        final isEditing = context.read<EditStudentBloc>().state.isEditing;
+
         return FilledButton(
           onPressed: isLoading ? null : onValidated,
           child: isLoading
               ? const CupertinoActivityIndicator()
-              : const Text('Add Student'),
+              : Text("${isEditing ? 'Update' : 'Add'} Student"),
         );
       },
     );
