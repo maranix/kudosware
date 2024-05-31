@@ -5,6 +5,7 @@ import 'package:kudosware/core/model/model.dart';
 import 'package:kudosware/core/repository/repository.dart';
 import 'package:kudosware/feature/edit_student/edit_student.dart';
 import 'package:kudosware/feature/students_overview/bloc/students_overview_bloc.dart';
+import 'package:kudosware/widgets/email_not_verified_banner.dart';
 import 'package:kudosware/widgets/widgets.dart';
 
 class StudentsOverviewPage extends StatelessWidget {
@@ -40,70 +41,72 @@ class _StudentsOverviewView extends StatelessWidget {
           AppBarLogoutButton(),
         ],
       ),
-      body: BlocConsumer<StudentsOverviewBloc, StudentsOverviewState>(
-        listenWhen: (previous, current) => previous.status != current.status,
-        listener: (context, state) {
-          if (state.status == StudentsOverviewStatus.failure &&
-              state.errorMessage != null) {
-            ScaffoldMessenger.of(context)
-              ..hideCurrentSnackBar()
-              ..showSnackBar(
-                SnackBar(
-                  content: Text(state.errorMessage!),
-                ),
-              );
-          }
-        },
-        builder: (context, state) {
-          if (state.studentIds.isEmpty) {
-            if (state.status == StudentsOverviewStatus.loading) {
-              return const Center(child: CupertinoActivityIndicator());
-            } else if (state.status != StudentsOverviewStatus.success) {
-              return const SizedBox();
-            } else {
-              return Center(
-                child: Text(
-                  'No students found',
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-              );
+      body: EmailNotVerifiedBanner(
+        child: BlocConsumer<StudentsOverviewBloc, StudentsOverviewState>(
+          listenWhen: (previous, current) => previous.status != current.status,
+          listener: (context, state) {
+            if (state.status == StudentsOverviewStatus.failure &&
+                state.errorMessage != null) {
+              ScaffoldMessenger.of(context)
+                ..hideCurrentSnackBar()
+                ..showSnackBar(
+                  SnackBar(
+                    content: Text(state.errorMessage!),
+                  ),
+                );
             }
-          }
-
-          final ids = state.studentIds;
-          return ListView.builder(
-            itemCount: state.studentIds.length,
-            itemBuilder: (context, index) {
-              final id = ids.elementAt(index);
-              final student = state.studentMap[id];
-              if (student == null) return const SizedBox.shrink();
-
-              return Padding(
-                padding: const EdgeInsets.symmetric(vertical: 4.0),
-                child: ListTile(
-                  key: ObjectKey(student),
-                  title: Text(student.fullName,
-                      style: Theme.of(context).textTheme.titleMedium!),
-                  trailing: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      _EditStudentButton(student),
-                      _DeleteStudentButton(student.id),
-                    ],
+          },
+          builder: (context, state) {
+            if (state.studentIds.isEmpty) {
+              if (state.status == StudentsOverviewStatus.loading) {
+                return const Center(child: CupertinoActivityIndicator());
+              } else if (state.status != StudentsOverviewStatus.success) {
+                return const SizedBox();
+              } else {
+                return Center(
+                  child: Text(
+                    'No students found',
+                    style: Theme.of(context).textTheme.bodySmall,
                   ),
-                  subtitle: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      Text(student.gender.value),
-                      Text(student.dobString),
-                    ],
+                );
+              }
+            }
+
+            final ids = state.studentIds;
+            return ListView.builder(
+              itemCount: state.studentIds.length,
+              itemBuilder: (context, index) {
+                final id = ids.elementAt(index);
+                final student = state.studentMap[id];
+                if (student == null) return const SizedBox.shrink();
+
+                return Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 4.0),
+                  child: ListTile(
+                    key: ObjectKey(student),
+                    title: Text(student.fullName,
+                        style: Theme.of(context).textTheme.titleMedium!),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        _EditStudentButton(student),
+                        _DeleteStudentButton(student.id),
+                      ],
+                    ),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(student.gender.value),
+                        Text(student.dobString),
+                      ],
+                    ),
                   ),
-                ),
-              );
-            },
-          );
-        },
+                );
+              },
+            );
+          },
+        ),
       ),
     );
   }
