@@ -54,3 +54,20 @@ String? validateConfirmPassword(String? confirmPassword, String? password) {
   }
   return null; // No error
 }
+
+String? validateDate(String? dateString) {
+  if (dateString?.isEmpty ?? true) {
+    return 'Date is required';
+  } else {
+    try {
+      // Attempt to parse the date string using DateTime.parse
+      DateTime.parse(dateString!.split('/').reversed.join('-'));
+    } on FormatException {
+      return 'Invalid date format. Please use DD/MM/YYYY.';
+    } catch (e) {
+      // Handle other potential exceptions (optional)
+      return 'Error processing date: $e';
+    }
+  }
+  return null; // No error
+}

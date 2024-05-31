@@ -1,6 +1,5 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kudosware/core/enums.dart';
 import 'package:kudosware/core/model/model.dart';
@@ -111,26 +110,35 @@ class _EditStudentFormState extends State<_EditStudentForm> {
 
   @override
   Widget build(BuildContext context) {
-    return Form(
-      key: _formKey,
-      child: Column(
-        children: [
-          const _FirstNameField(),
-          const _LastNameField(),
-          const Row(
-            children: [
-              Expanded(child: _GenderField()),
-              SizedBox(width: 8),
-              Expanded(child: _DOBPicker()),
-            ],
-          ),
-          _AddStudentButton(onValidated: _onValidated),
-        ]
-            .map((child) => Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 8),
-                  child: child,
-                ))
-            .toList(),
+    return BlocListener<EditStudentBloc, EditStudentState>(
+      listenWhen: (prev, curr) => prev.status != curr.status,
+      listener: (context, state) {
+        return switch (state.status) {
+          EditStudentStatus.success => _formKey.currentState?.reset(),
+          _ => null,
+        };
+      },
+      child: Form(
+        key: _formKey,
+        child: Column(
+          children: [
+            const _FirstNameField(),
+            const _LastNameField(),
+            const Row(
+              children: [
+                Expanded(child: _GenderField()),
+                SizedBox(width: 8),
+                Expanded(child: _DOBPicker()),
+              ],
+            ),
+            _AddStudentButton(onValidated: _onValidated),
+          ]
+              .map((child) => Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 8),
+                    child: child,
+                  ))
+              .toList(),
+        ),
       ),
     );
   }
@@ -227,14 +235,12 @@ class _DOBPicker extends StatefulWidget {
 class _DOBPickerState extends State<_DOBPicker> {
   late TextEditingController _controller;
 
-  void _updateControllerText(DateTime date) {
-    _controller.text = _formatDate(date);
-  }
-
   @override
   void initState() {
     super.initState();
-    _controller = TextEditingController();
+
+    final date = context.read<EditStudentBloc>().state.dob;
+    _controller = TextEditingController(text: _formatDate(date));
   }
 
   @override
@@ -247,9 +253,6 @@ class _DOBPickerState extends State<_DOBPicker> {
   Widget build(BuildContext context) {
     final isEnabled = context.select<EditStudentBloc, bool>(
         (bloc) => bloc.state.status != EditStudentStatus.loading);
-    final dob =
-        context.select<EditStudentBloc, DateTime>((bloc) => bloc.state.dob);
-    _updateControllerText(dob);
 
     return TextFormField(
       key: const Key('editStudentView_lastName_textFormField'),
@@ -261,18 +264,20 @@ class _DOBPickerState extends State<_DOBPicker> {
         hintText: '01/01/1900',
       ),
       onTap: () async {
-        FocusScope.of(context).requestFocus(FocusNode());
-
+        final initialDate = context.read<EditStudentBloc>().state.dob;
         final pickedDOB = await showDatePicker(
           context: context,
-          initialDate: dob,
+          initialDate: initialDate,
           firstDate: DateTime(1900),
           lastDate: DateTime.now(),
         );
         if (pickedDOB != null && context.mounted) {
           context.read<EditStudentBloc>().add(EditStudentDOBChanged(pickedDOB));
+          _controller.text = _formatDate(pickedDOB);
+          FocusScope.of(context).unfocus();
         }
       },
+      validator: validateDate,
     );
   }
 
