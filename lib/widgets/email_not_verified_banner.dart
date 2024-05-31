@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:kudosware/app/app.dart';
+import 'package:kudosware/core/model/model.dart';
 
 class EmailNotVerifiedBanner extends StatefulWidget {
   const EmailNotVerifiedBanner({
@@ -56,7 +57,8 @@ class _EmailNotVerifiedBannerState extends State<EmailNotVerifiedBanner> {
   @override
   Widget build(BuildContext context) {
     return BlocListener<AppBloc, AppState>(
-      listenWhen: (prev, curr) => prev.user != curr.user,
+      listenWhen: (prev, curr) =>
+          (prev.user != curr.user) && (curr.user != User.empty),
       listener: (context, state) {
         if (state.user.isEmailVerified) {
           _removeBanner();

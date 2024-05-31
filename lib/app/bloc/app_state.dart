@@ -14,7 +14,8 @@ final class AppState extends Equatable {
   const AppState.authenticated(User user)
       : this._(status: AppStatus.authenticated, user: user);
 
-  const AppState.unauthenticated() : this._(status: AppStatus.unauthenticated);
+  const AppState.unauthenticated()
+      : this._(status: AppStatus.unauthenticated, user: User.empty);
 
   final AppStatus status;
   final User user;
