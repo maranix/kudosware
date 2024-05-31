@@ -83,7 +83,7 @@ final class EditStudentBloc extends Bloc<EditStudentEvent, EditStudentState> {
     student = student.copyWith(
       firstName: state.firstName,
       lastName: state.lastName,
-      gender: GenderEnum.values.firstWhere((v) => v.name == state.gender),
+      gender: GenderEnum.fromString(state.gender!),
       dateOfBirth: state.dob,
       updatedAt: DateTime.now(),
     );

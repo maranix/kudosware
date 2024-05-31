@@ -9,12 +9,10 @@ enum EditStudentStatus {
 
 final class EditStudentState extends Equatable {
   factory EditStudentState() {
-    return EditStudentState._(
+    return const EditStudentState._(
       status: EditStudentStatus.initial,
       firstName: '',
       lastName: '',
-      gender: '',
-      dob: DateTime.now(),
       isEditing: false,
     );
   }
@@ -34,9 +32,9 @@ final class EditStudentState extends Equatable {
     required this.status,
     required this.firstName,
     required this.lastName,
-    required this.gender,
-    required this.dob,
     required this.isEditing,
+    this.gender,
+    this.dob,
     this.errorMessage,
   });
 
@@ -46,9 +44,9 @@ final class EditStudentState extends Equatable {
 
   final String lastName;
 
-  final String gender;
+  final String? gender;
 
-  final DateTime dob;
+  final DateTime? dob;
 
   final bool isEditing;
 

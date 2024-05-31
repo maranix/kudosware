@@ -205,7 +205,7 @@ class _GenderField extends StatelessWidget {
 
     return DropdownButtonFormField(
       key: const Key('editStudentView_gender_textFormField'),
-      value: initialValue.isEmpty ? 'other' : initialValue,
+      value: initialValue,
       decoration: textFieldDecoration(
         enabled: isEnabled,
         labelText: 'Gender',
@@ -214,12 +214,19 @@ class _GenderField extends StatelessWidget {
       items: GenderEnum.values.map((g) {
         return DropdownMenuItem<String>(
           value: g.name,
-          child: Text(g.name.replaceFirst(g.name[0], g.name[0].toUpperCase())),
+          child: Text(g.value),
         );
       }).toList(),
       onChanged: (value) {
         if (value == null) return;
         context.read<EditStudentBloc>().add(EditStudentGenderChanged(value));
+      },
+      validator: (value) {
+        if (value == null) {
+          return "Gender cannot be empty";
+        }
+
+        return null;
       },
     );
   }
@@ -240,7 +247,12 @@ class _DOBPickerState extends State<_DOBPicker> {
     super.initState();
 
     final date = context.read<EditStudentBloc>().state.dob;
-    _controller = TextEditingController(text: _formatDate(date));
+
+    if (date != null) {
+      _controller = TextEditingController(text: _formatDate(date));
+    } else {
+      _controller = TextEditingController();
+    }
   }
 
   @override
