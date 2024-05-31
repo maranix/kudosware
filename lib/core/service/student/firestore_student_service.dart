@@ -1,33 +1,46 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:kudosware/core/model/model.dart';
 import 'package:kudosware/core/service/student/student_service.dart';
 
 final class FirestoreStudentService implements StudentService {
   FirestoreStudentService({
+    required FirebaseAuth firebaseAuth,
     required FirebaseFirestore firestore,
-  }) : _firestore = firestore;
+  })  : _firestore = firestore,
+        _firebaseAuth = firebaseAuth;
+
+  final FirebaseAuth _firebaseAuth;
 
   final FirebaseFirestore _firestore;
 
   static const _collectionName = "students";
+  String get _currentUserId {
+    return _firebaseAuth.currentUser!.uid;
+  }
+
+  CollectionReference<StudentEntry> get _queryCollection =>
+      _firestore.collection(_collectionName).withConverter<StudentEntry>(
+            fromFirestore: (snapshot, options) =>
+                StudentEntry.fromFirestore(snapshot, options),
+            toFirestore: (model, options) => model.toFirestore(),
+          );
+
+  Query<StudentEntry> get _queryUserEntries => _queryCollection.where(
+        'user_id',
+        isEqualTo: _currentUserId,
+      );
 
   @override
-  Future<({List<Student> data, DocumentSnapshot<Object?>? lastDoc})>
+  Future<({List<StudentEntry> data, DocumentSnapshot<Object?>? lastDoc})>
       getStudents({
     required int limit,
     DocumentSnapshot<Object?>? lastReceived,
   }) async {
-    final query = _firestore
-        .collection(_collectionName)
-        .withConverter<Student>(
-          fromFirestore: (snapshot, options) =>
-              Student.fromFirestore(snapshot, options),
-          toFirestore: (model, options) => model.toFirestore(),
-        )
-        .orderBy('updated_at', descending: true)
-        .limit(limit);
+    final query =
+        _queryUserEntries.orderBy('updated_at', descending: true).limit(limit);
 
-    QuerySnapshot<Student> res;
+    QuerySnapshot<StudentEntry> res;
     if (lastReceived != null) {
       res = await query.startAfterDocument(lastReceived).get();
     } else {
@@ -40,23 +53,17 @@ final class FirestoreStudentService implements StudentService {
   }
 
   @override
-  Future<Student> create(Student student) async {
-    final ref =
-        _firestore.collection(_collectionName).doc().withConverter<Student>(
-              fromFirestore: (snapshot, options) =>
-                  Student.fromFirestore(snapshot, options),
-              toFirestore: (model, options) => model.toFirestore(),
-            );
+  Future<StudentEntry> create(StudentEntry student) async {
+    final ref = _queryCollection.doc();
+    final data = student.copyWith(id: ref.id, userId: _currentUserId);
 
-    final data = student.copyWith(id: ref.id);
     await ref.set(data);
-
     return data;
   }
 
   @override
-  Future<Student> update(Student student) async {
-    final ref = _firestore.collection(_collectionName).doc(student.id);
+  Future<StudentEntry> update(StudentEntry student) async {
+    final ref = _queryCollection.doc(student.id);
     final data = student.toFirestore();
 
     await ref.update(data);
@@ -65,17 +72,9 @@ final class FirestoreStudentService implements StudentService {
 
   @override
   Future<void> delete(String studentId) async {
-    await _firestore.collection(_collectionName).doc(studentId).delete();
+    await _queryCollection.doc(studentId).delete();
   }
 
-  Stream<QuerySnapshot<Student>> get studentCollectionChangesStream =>
-      _firestore
-          .collection(_collectionName)
-          .withConverter<Student>(
-            fromFirestore: (snapshot, options) =>
-                Student.fromFirestore(snapshot, options),
-            toFirestore: (model, options) => model.toFirestore(),
-          )
-          .orderBy('updated_at', descending: true)
-          .snapshots();
+  Stream<QuerySnapshot<StudentEntry>> get studentCollectionChangesStream =>
+      _queryUserEntries.orderBy('updated_at', descending: true).snapshots();
 }

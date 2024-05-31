@@ -4,9 +4,9 @@ import 'package:kudosware/core/model/model.dart';
 export './firestore_student_service.dart';
 
 abstract interface class StudentService {
-  Future<({List<Student> data, DocumentSnapshot<Object?>? lastDoc})>
+  Future<({List<StudentEntry> data, DocumentSnapshot<Object?>? lastDoc})>
       getStudents({required int limit});
-  Future<Student> create(Student student);
-  Future<Student> update(Student student);
+  Future<StudentEntry> create(StudentEntry student);
+  Future<StudentEntry> update(StudentEntry student);
   Future<void> delete(String studentId);
 }

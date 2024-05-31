@@ -95,7 +95,7 @@ class _StudentsOverviewView extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      Text(student.genderString),
+                      Text(student.gender.value),
                       Text(student.dobString),
                     ],
                   ),
@@ -112,7 +112,7 @@ class _StudentsOverviewView extends StatelessWidget {
 class _EditStudentButton extends StatelessWidget {
   const _EditStudentButton(this.student);
 
-  final Student student;
+  final StudentEntry student;
 
   @override
   Widget build(BuildContext context) {

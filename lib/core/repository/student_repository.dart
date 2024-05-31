@@ -15,9 +15,9 @@ final class StudentRepository {
   static const _pageSize = 10;
 
   final _studentCollectionStreamController =
-      StreamController<QuerySnapshot<Student>>.broadcast();
+      StreamController<QuerySnapshot<StudentEntry>>.broadcast();
 
-  Future<ApiResponse<List<Student>>> getStudents({
+  Future<ApiResponse<List<StudentEntry>>> getStudents({
     int limit = _pageSize,
     DocumentSnapshot<Object?>? lastReceived,
   }) async {
@@ -48,7 +48,7 @@ final class StudentRepository {
     }
   }
 
-  Future<ApiResponse<Student>> create(Student student) async {
+  Future<ApiResponse<StudentEntry>> create(StudentEntry student) async {
     try {
       final resData = await _service.create(student);
       return ApiResponse.success(resData);
@@ -68,7 +68,7 @@ final class StudentRepository {
     }
   }
 
-  Future<ApiResponse<Student>> update(Student student) async {
+  Future<ApiResponse<StudentEntry>> update(StudentEntry student) async {
     try {
       final resData = await _service.update(student);
       return ApiResponse.success(resData);
@@ -108,7 +108,8 @@ final class StudentRepository {
     }
   }
 
-  Stream<QuerySnapshot<Student>> get firestoreStudentCollectionChangesStream {
+  Stream<QuerySnapshot<StudentEntry>>
+      get firestoreStudentCollectionChangesStream {
     if (_service is! FirestoreStudentService) {
       throw InvalidInterfaceImplementation(
         message:

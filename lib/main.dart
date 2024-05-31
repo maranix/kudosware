@@ -30,6 +30,7 @@ Future<void> main() async {
         RepositoryProvider<StudentRepository>(
           create: (context) => StudentRepository(
             service: FirestoreStudentService(
+              firebaseAuth: FirebaseAuth.instance,
               firestore: FirebaseFirestore.instance,
             ),
           ),

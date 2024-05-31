@@ -1,10 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:equatable/equatable.dart';
 import 'package:kudosware/core/enums.dart';
 import 'package:kudosware/core/exception/exception.dart';
 
-class Student {
-  const Student({
+final class StudentEntry extends Equatable {
+  const StudentEntry({
     required this.id,
+    required this.userId,
     required this.firstName,
     required this.lastName,
     required this.gender,
@@ -14,6 +16,8 @@ class Student {
   });
 
   final String id;
+
+  final String userId;
 
   final String firstName;
 
@@ -27,7 +31,7 @@ class Student {
 
   final DateTime updatedAt;
 
-  factory Student.fromFirestore(
+  factory StudentEntry.fromFirestore(
     DocumentSnapshot<Map<String, dynamic>> snapshot,
     SnapshotOptions? options,
   ) {
@@ -36,6 +40,7 @@ class Student {
     if (data
         case {
           'id': String id,
+          'user_id': String userId,
           'first_name': String firstName,
           'last_name': String lastName,
           'gender': String gender,
@@ -43,13 +48,12 @@ class Student {
           'created_at': Timestamp createdAt,
           'updated_at': Timestamp updatedAt,
         }) {
-      return Student(
+      return StudentEntry(
         id: id,
+        userId: userId,
         firstName: firstName,
         lastName: lastName,
-        gender: GenderEnum.values.firstWhere(
-          (e) => e.name == gender,
-        ),
+        gender: GenderEnum.fromString(gender),
         dateOfBirth: dateOfBirth.toDate(),
         createdAt: createdAt.toDate(),
         updatedAt: updatedAt.toDate(),
@@ -61,6 +65,7 @@ class Student {
 
   Map<String, dynamic> toFirestore() => {
         'id': id,
+        'user_id': userId,
         'first_name': firstName,
         'last_name': lastName,
         'gender': gender.name,
@@ -69,8 +74,9 @@ class Student {
         'updated_at': Timestamp.fromDate(updatedAt),
       };
 
-  Student copyWith({
+  StudentEntry copyWith({
     String? id,
+    String? userId,
     String? firstName,
     String? lastName,
     GenderEnum? gender,
@@ -78,8 +84,9 @@ class Student {
     DateTime? createdAt,
     DateTime? updatedAt,
   }) {
-    return Student(
+    return StudentEntry(
       id: id ?? this.id,
+      userId: userId ?? this.userId,
       firstName: firstName ?? this.firstName,
       lastName: lastName ?? this.lastName,
       gender: gender ?? this.gender,
@@ -89,11 +96,12 @@ class Student {
     );
   }
 
-  static Student empty() {
+  static StudentEntry empty() {
     final dummyDate = DateTime.now();
 
-    return Student(
+    return StudentEntry(
       id: '',
+      userId: '',
       firstName: '',
       lastName: '',
       gender: GenderEnum.other,
@@ -106,31 +114,16 @@ class Student {
   String get fullName => "$firstName $lastName";
   String get dobString =>
       "${dateOfBirth.day.toString().padLeft(2, '0')}-${dateOfBirth.month.toString().padLeft(2, '0')}-${dateOfBirth.year}";
-  String get genderString =>
-      gender.name.replaceFirst(gender.name[0], gender.name[0].toUpperCase());
 
   @override
-  bool operator ==(Object other) {
-    if (identical(this, other)) return true;
-
-    return other is Student &&
-        other.id == id &&
-        other.firstName == firstName &&
-        other.lastName == lastName &&
-        other.gender == gender &&
-        other.dateOfBirth == dateOfBirth &&
-        other.createdAt == createdAt &&
-        other.updatedAt == updatedAt;
-  }
-
-  @override
-  int get hashCode => Object.hashAll([
+  List<Object> get props => [
         id,
+        userId,
         firstName,
         lastName,
-        gender.name,
+        gender,
         dateOfBirth,
         createdAt,
         updatedAt,
-      ]);
+      ];
 }

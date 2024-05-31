@@ -10,7 +10,7 @@ part 'edit_student_state.dart';
 final class EditStudentBloc extends Bloc<EditStudentEvent, EditStudentState> {
   EditStudentBloc({
     required StudentRepository repo,
-    Student? student,
+    StudentEntry? student,
   })  : _repo = repo,
         _student = student,
         super(
@@ -76,7 +76,7 @@ final class EditStudentBloc extends Bloc<EditStudentEvent, EditStudentState> {
     emit(state.copyWith(status: EditStudentStatus.loading));
 
     var student = switch (_student) {
-      null => Student.empty(),
+      null => StudentEntry.empty(),
       _ => _student,
     };
 
@@ -88,7 +88,7 @@ final class EditStudentBloc extends Bloc<EditStudentEvent, EditStudentState> {
       updatedAt: DateTime.now(),
     );
 
-    ApiResponse<Student> res;
+    ApiResponse<StudentEntry> res;
     if (_student != null) {
       res = await _repo.update(student);
     } else {
@@ -113,5 +113,5 @@ final class EditStudentBloc extends Bloc<EditStudentEvent, EditStudentState> {
 
   final StudentRepository _repo;
 
-  final Student? _student;
+  final StudentEntry? _student;
 }

@@ -161,13 +161,13 @@ final class StudentsOverviewBloc
     }
   }
 
-  void _collectionlistener(QuerySnapshot<Student> event) {
+  void _collectionlistener(QuerySnapshot<StudentEntry> event) {
     add(StudentsOverviewCollectionChanged(event));
   }
 
-  StudentsOverviewState _addStudentList(List<Student> list) {
+  StudentsOverviewState _addStudentList(List<StudentEntry> list) {
     final ids = Set<String>.from(state.studentIds);
-    final map = Map<String, Student>.from(state.studentMap);
+    final map = Map<String, StudentEntry>.from(state.studentMap);
 
     for (var student in list) {
       ids.add(student.id);
@@ -177,9 +177,9 @@ final class StudentsOverviewBloc
     return state.copyWith(studentIds: ids, studentMap: map);
   }
 
-  StudentsOverviewState _addStudent(Student student) {
+  StudentsOverviewState _addStudent(StudentEntry student) {
     final ids = <String>{student.id, ...state.studentIds};
-    final map = Map<String, Student>.from(state.studentMap);
+    final map = Map<String, StudentEntry>.from(state.studentMap);
 
     map[student.id] = student;
     return state.copyWith(studentIds: ids, studentMap: map);
@@ -187,7 +187,7 @@ final class StudentsOverviewBloc
 
   StudentsOverviewState _removeStudent(String id) {
     final ids = Set<String>.from(state.studentIds);
-    final map = Map<String, Student>.from(state.studentMap);
+    final map = Map<String, StudentEntry>.from(state.studentMap);
 
     ids.remove(id);
     map.remove(id);
@@ -203,6 +203,6 @@ final class StudentsOverviewBloc
 
   final StudentRepository _repo;
 
-  StreamSubscription<QuerySnapshot<Student>>?
+  StreamSubscription<QuerySnapshot<StudentEntry>>?
       _studentCollectionChangesSubscription;
 }
